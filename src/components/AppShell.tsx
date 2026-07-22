@@ -12,6 +12,7 @@ const TOOL_NAV_ITEMS: NavItem[] = [
   { href: "/", icon: "⌂", label: "Central" },
   { href: "/conciliacao", icon: "⇄", label: "Conciliação Bancária" },
   { href: "/estoque", icon: "📊", label: "Calculadora de Estoque" },
+  { href: "/entregas", icon: "📈", label: "Gestão de Entregas" },
 ];
 
 const UTILITY_NAV_ITEMS: NavItem[] = [

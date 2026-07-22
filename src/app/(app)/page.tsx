@@ -13,6 +13,12 @@ const TOOLS = [
     title: "Calculadora de Estoque",
     description: "Estima o estoque final quando o cliente não envia controle de estoque, a partir de EI, compras e faturamento.",
   },
+  {
+    href: "/entregas",
+    icon: "📈",
+    title: "Gestão de Entregas",
+    description: "Acompanhamento de entregas conforme relatório extraído do Acessórias.",
+  },
 ];
 
 export default function HomePage() {
@@ -34,7 +40,7 @@ export default function HomePage() {
         <div className="tool-card tool-card-placeholder">
           <span className="tc-icon">+</span>
           <h3>Próxima ferramenta</h3>
-          <p>Gestão de Entregas, Análise Tributária, Agenda e Mural chegam nas próximas fases.</p>
+          <p>Análise Tributária, Agenda e Mural chegam nas próximas fases.</p>
         </div>
       </div>
     </section>

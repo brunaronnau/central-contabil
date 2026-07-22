@@ -1252,3 +1252,231 @@ table.users .avatar {
   display: flex;
   gap: 6px;
 }
+
+/* ---------- Gestão de Entregas ---------- */
+#tool-entregas .chart-box {
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+#tool-entregas .chart-box h3 {
+  margin: 0 0 14px;
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+#tool-entregas table.heatmap {
+  border-collapse: separate;
+  border-spacing: 3px;
+  font-size: 11px;
+}
+#tool-entregas table.heatmap th {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: none;
+  padding: 2px 4px;
+  border: none;
+  white-space: nowrap;
+}
+#tool-entregas table.heatmap th.person {
+  text-align: left;
+  font-size: 11px;
+}
+#tool-entregas table.heatmap td {
+  border: none;
+  padding: 0;
+}
+#tool-entregas .hm-cell {
+  width: 26px;
+  height: 22px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink);
+}
+#tool-entregas .hm-0 {
+  background: var(--paper);
+  color: var(--ink-soft);
+}
+#tool-entregas .hm-1 {
+  background: #dce6ee;
+}
+#tool-entregas .hm-2 {
+  background: #a9c1d6;
+}
+#tool-entregas .hm-3 {
+  background: #7096b9;
+  color: #fff;
+}
+#tool-entregas .hm-4 {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ---------- Modo apresentação ---------- */
+body.presentation-mode #tool-entregas {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: var(--paper);
+  overflow-y: auto;
+  padding-bottom: 60px;
+}
+body.presentation-mode #tool-entregas .wrap {
+  max-width: 100%;
+  padding: 0 40px;
+}
+body.presentation-mode #tool-entregas .kpi .value {
+  font-size: 32px;
+}
+body.presentation-mode #tool-entregas .step-title {
+  font-size: 26px;
+}
+body.presentation-mode #tool-entregas table.results {
+  font-size: 14px;
+}
+#ent-btnSairApresentacaoFloat {
+  display: none;
+}
+body.presentation-mode #ent-btnSairApresentacaoFloat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---------- Impressão (exportar como PDF) ---------- */
+@media print {
+  .sidebar {
+    display: none !important;
+  }
+  .app-shell {
+    display: block !important;
+  }
+  .main-area {
+    width: 100% !important;
+  }
+
+  @page {
+    size: landscape;
+    margin: 14mm 16mm;
+  }
+
+  #tool-entregas {
+    counter-reset: entSlide;
+  }
+  #tool-entregas .no-print {
+    display: none !important;
+  }
+
+  #tool-entregas .tool-header {
+    background: #fff !important;
+    color: var(--ink) !important;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    page-break-after: always;
+    border-bottom: 3px solid var(--accent);
+    padding: 0;
+  }
+  #tool-entregas .tool-header .wrap {
+    padding: 0 10mm;
+  }
+  #tool-entregas .tool-header .back-link {
+    display: none;
+  }
+  #tool-entregas .tool-header h1 {
+    font-size: 44px;
+    color: var(--ink);
+  }
+  #tool-entregas .tool-header p {
+    font-size: 16px;
+    color: var(--ink-soft) !important;
+    max-width: 760px;
+  }
+  #tool-entregas .tool-header::after {
+    content: "Central Contábil · Navecon";
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin: 24px 10mm 0;
+  }
+
+  #tool-entregas section.step {
+    position: relative;
+    min-height: 88vh;
+    padding: 8mm 10mm 16mm;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    page-break-after: always;
+    page-break-inside: avoid;
+    border-bottom: none;
+    counter-increment: entSlide;
+  }
+  #tool-entregas section.step:last-of-type {
+    page-break-after: auto;
+  }
+  #tool-entregas .step-head {
+    margin-bottom: 26px;
+  }
+  #tool-entregas .step-num {
+    display: none;
+  }
+  #tool-entregas .step-title {
+    font-size: 32px;
+    font-family: var(--serif);
+    position: relative;
+    padding-bottom: 12px;
+  }
+  #tool-entregas .step-title::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 64px;
+    height: 4px;
+    background: var(--accent);
+  }
+  #tool-entregas .step-sub {
+    font-size: 13.5px;
+    max-width: 720px;
+  }
+  #tool-entregas section.step::after {
+    content: "Navecon · Gestão de Entregas · " counter(entSlide);
+    position: absolute;
+    bottom: 8mm;
+    right: 10mm;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+  }
+
+  #tool-entregas .summary {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  #tool-entregas .kpi .value {
+    font-size: 30px;
+  }
+  #tool-entregas .panel,
+  #tool-entregas .kpi,
+  #tool-entregas .chart-box {
+    break-inside: avoid;
+  }
+  #tool-entregas table.results {
+    font-size: 12px;
+  }
+}

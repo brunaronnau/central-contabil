@@ -14,7 +14,7 @@ Migração feita em fases. Fase atual: fundação + primeiros módulos.
 - [x] Aniversariantes
 - [x] Conciliação Bancária Assistida
 - [x] Calculadora de Estoque
-- [ ] Gestão de Entregas
+- [x] Gestão de Entregas
 - [ ] Análise Tributária
 - [ ] Agenda da Controladoria
 - [ ] Recados & Metas (Mural)
