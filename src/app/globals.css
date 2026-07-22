@@ -1966,3 +1966,423 @@ body.presentation-mode #tool-fiscal .chart-box h3 {
     background: var(--ink) !important;
   }
 }
+
+/* ---------- Agenda da Controladoria ---------- */
+#tool-agenda .agenda-status-banner {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: linear-gradient(135deg, var(--accent-soft), #fff);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  margin-bottom: 26px;
+  box-shadow: 0 2px 10px rgba(43, 76, 111, 0.06);
+}
+#tool-agenda .agenda-status-banner b {
+  display: block;
+  font-size: 12.5px;
+  margin-bottom: 2px;
+}
+#tool-agenda .agenda-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+#tool-agenda .agenda-pills {
+  display: flex;
+  gap: 4px;
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 4px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+#tool-agenda .agenda-pill {
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 15px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+#tool-agenda .agenda-pill:hover {
+  color: var(--ink);
+}
+#tool-agenda .agenda-pill.active {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(27, 36, 48, 0.25);
+}
+#tool-agenda .agenda-live {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+#tool-agenda .agenda-live .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4c9a6e;
+  box-shadow: 0 0 0 0 rgba(76, 154, 110, 0.6);
+  animation: nbPulse 2s infinite;
+}
+@keyframes nbPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 154, 110, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(76, 154, 110, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 154, 110, 0);
+  }
+}
+#tool-agenda .agenda-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+#tool-agenda .controller-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 13px;
+  border-radius: 20px;
+  border: 1.5px solid var(--line);
+  background: var(--paper-alt);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+#tool-agenda .controller-chip:hover {
+  border-color: var(--accent);
+}
+#tool-agenda .controller-chip .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+#tool-agenda .controller-chip.active {
+  border-color: currentColor;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+#tool-agenda .agenda-custom-range {
+  display: none;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 22px;
+}
+#tool-agenda .agenda-custom-range.active {
+  display: flex;
+}
+#tool-agenda .agenda-custom-range .param {
+  min-width: 150px;
+}
+#tool-agenda .agenda-custom-range label {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 5px;
+}
+#tool-agenda .agenda-weeks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-bottom: 30px;
+}
+@media (max-width: 920px) {
+  #tool-agenda .agenda-weeks {
+    grid-template-columns: 1fr;
+  }
+}
+#tool-agenda .agenda-week-card {
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 1px 3px rgba(27, 36, 48, 0.04);
+  transition: box-shadow 0.15s;
+}
+#tool-agenda .agenda-week-card:hover {
+  box-shadow: 0 4px 16px rgba(27, 36, 48, 0.07);
+}
+#tool-agenda .agenda-week-card.next-week {
+  border-color: var(--accent);
+  border-width: 1.5px;
+  box-shadow: 0 4px 20px rgba(43, 76, 111, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+#tool-agenda .agenda-week-card.next-week::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--brass));
+}
+#tool-agenda .agenda-week-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+#tool-agenda .agenda-week-head h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 600;
+}
+#tool-agenda .agenda-week-head .wk-range {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  background: var(--paper);
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+#tool-agenda .agenda-week-card.next-week .agenda-week-head h3 {
+  color: var(--accent);
+}
+#tool-agenda .focus-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(120deg, var(--accent), #3d6690);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(43, 76, 111, 0.3);
+}
+#tool-agenda .agenda-day {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 13px 15px;
+  margin-bottom: 10px;
+  transition: border-color 0.15s;
+}
+#tool-agenda .agenda-day:last-child {
+  margin-bottom: 0;
+}
+#tool-agenda .agenda-day.is-today {
+  border-color: var(--brass);
+  background: linear-gradient(135deg, var(--warn-bg), #fff);
+  box-shadow: 0 2px 8px rgba(138, 109, 59, 0.1);
+}
+#tool-agenda .agenda-day-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin-bottom: 9px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+#tool-agenda .agenda-day-head .today-tag {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  background: var(--brass);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+#tool-agenda .agenda-empty-day {
+  font-size: 12px;
+  color: var(--ink-soft);
+  padding: 4px 2px;
+}
+#tool-agenda .agenda-event {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  padding: 8px 6px;
+  border-top: 1px dashed var(--line);
+  border-radius: 6px;
+  transition: background 0.12s;
+  margin: 0 -6px;
+}
+#tool-agenda .agenda-event:hover {
+  background: rgba(43, 76, 111, 0.045);
+}
+#tool-agenda .agenda-day .agenda-event:first-of-type {
+  border-top: none;
+  padding-top: 1px;
+}
+#tool-agenda .agenda-day .agenda-event:last-child {
+  padding-bottom: 1px;
+}
+#tool-agenda .agenda-event .ae-time {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  flex: none;
+  width: 46px;
+  padding: 2px 0 0;
+  font-weight: 600;
+}
+#tool-agenda .agenda-event .ae-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  margin-top: 5px;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+}
+#tool-agenda .agenda-event .ae-body {
+  flex: 1;
+  min-width: 0;
+}
+#tool-agenda .agenda-event .ae-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+#tool-agenda .agenda-event .ae-who {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  margin-top: 1px;
+}
+#tool-agenda .agenda-event.is-new .ae-title::after {
+  content: "novo";
+  margin-left: 7px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  background: var(--success-bg);
+  color: var(--success);
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+#tool-agenda .agenda-event.is-changed .ae-title::after {
+  content: "alterado";
+  margin-left: 7px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  background: var(--warn-bg);
+  color: var(--warn);
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+#tool-agenda .agenda-event.is-cancelled .ae-title {
+  text-decoration: line-through;
+  color: var(--ink-soft);
+}
+#tool-agenda .agenda-event.is-cancelled .ae-title::after {
+  content: "cancelado";
+  margin-left: 7px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  background: var(--danger-bg);
+  color: var(--danger);
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+#tool-agenda .agenda-changelog {
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 1px 3px rgba(27, 36, 48, 0.04);
+}
+#tool-agenda .agenda-changelog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 4px;
+}
+#tool-agenda .agenda-changelog h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--serif);
+}
+#tool-agenda .agenda-changelog-clear {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  flex: none;
+}
+#tool-agenda .agenda-changelog-clear:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+#tool-agenda .agenda-changelog .panel-sub {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  margin: 0 0 14px;
+}
+#tool-agenda .agenda-changelog-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 9px 0;
+  border-top: 1px dashed var(--line);
+  font-size: 12.5px;
+}
+#tool-agenda .agenda-changelog-item:first-child {
+  border-top: none;
+}
+#tool-agenda .agenda-changelog-item .ac-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  margin-top: 4px;
+}
+#tool-agenda .agenda-changelog-item .ac-when {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  flex: none;
+}

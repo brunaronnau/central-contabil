@@ -16,7 +16,7 @@ Migração feita em fases. Fase atual: fundação + primeiros módulos.
 - [x] Calculadora de Estoque
 - [x] Gestão de Entregas
 - [x] Análise Tributária
-- [ ] Agenda da Controladoria
+- [x] Agenda da Controladoria (protótipo com dados de exemplo — aguarda integração Microsoft 365)
 - [ ] Recados & Metas (Mural)
 
 ## Rodando localmente (com Docker)
