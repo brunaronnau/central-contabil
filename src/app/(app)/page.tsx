@@ -2,6 +2,12 @@ import Link from "next/link";
 
 const TOOLS = [
   {
+    href: "/conciliacao",
+    icon: "⇄",
+    title: "Conciliação Bancária",
+    description: "Confronte extrato bancário e relatório de contas por valor, data e descrição, com apoio de IA.",
+  },
+  {
     href: "/sugestoes",
     icon: "💡",
     title: "Sugestões",
@@ -40,7 +46,7 @@ export default function HomePage() {
         <div className="tool-card tool-card-placeholder">
           <span className="tc-icon">+</span>
           <h3>Próxima ferramenta</h3>
-          <p>Conciliação Bancária, Estoque, Entregas, Análise Tributária e Agenda chegam nas próximas fases.</p>
+          <p>Calculadora de Estoque, Gestão de Entregas, Análise Tributária, Agenda e Mural chegam nas próximas fases.</p>
         </div>
       </div>
     </section>

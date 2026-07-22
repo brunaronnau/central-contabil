@@ -525,6 +525,7 @@ export function exportExcel(
   pendBanco: Entry[],
   pendContas: Entry[],
   bankEntries: Entry[],
+  ledgerEntries: Entry[],
 ) {
   const wb = XLSX.utils.book_new();
 
@@ -575,6 +576,7 @@ export function exportExcel(
     ["Data de geração", new Date().toLocaleString("pt-BR")],
     ["", ""],
     ["Itens no extrato bancário", bankEntries.length],
+    ["Itens no relatório de contas", ledgerEntries.length],
     ["Itens conciliados (1 para 1)", matches.length],
     ["Itens conciliados (soma, N para 1)", groupMatches.length],
     ["Itens pendentes (banco)", pendBanco.length],

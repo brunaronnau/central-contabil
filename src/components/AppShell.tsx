@@ -9,6 +9,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/", icon: "⌂", label: "Central" },
+  { href: "/conciliacao", icon: "⇄", label: "Conciliação Bancária" },
   { href: "/sugestoes", icon: "💡", label: "Sugestões" },
   { href: "/aniversariantes", icon: "🎂", label: "Aniversariantes" },
   { href: "/usuarios", icon: "👥", label: "Usuários" },
