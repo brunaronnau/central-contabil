@@ -7,24 +7,6 @@ const TOOLS = [
     title: "Conciliação Bancária",
     description: "Confronte extrato bancário e relatório de contas por valor, data e descrição, com apoio de IA.",
   },
-  {
-    href: "/sugestoes",
-    icon: "💡",
-    title: "Sugestões",
-    description: "Envie e vote em sugestões de melhoria para a Central e a Navecon.",
-  },
-  {
-    href: "/aniversariantes",
-    icon: "🎂",
-    title: "Aniversariantes",
-    description: "Colaboradores que informaram a data de nascimento, ordenados pelo próximo aniversário.",
-  },
-  {
-    href: "/usuarios",
-    icon: "👥",
-    title: "Usuários",
-    description: "Lista de todos os cadastros ativos na Central Contábil.",
-  },
 ];
 
 export default function HomePage() {

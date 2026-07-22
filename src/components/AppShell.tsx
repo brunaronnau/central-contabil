@@ -8,12 +8,15 @@ type NavItem = {
   label: string;
 };
 
-const NAV_ITEMS: NavItem[] = [
+const TOOL_NAV_ITEMS: NavItem[] = [
   { href: "/", icon: "⌂", label: "Central" },
   { href: "/conciliacao", icon: "⇄", label: "Conciliação Bancária" },
-  { href: "/sugestoes", icon: "💡", label: "Sugestões" },
+];
+
+const UTILITY_NAV_ITEMS: NavItem[] = [
   { href: "/aniversariantes", icon: "🎂", label: "Aniversariantes" },
   { href: "/usuarios", icon: "👥", label: "Usuários" },
+  { href: "/sugestoes", icon: "💡", label: "Sugestões" },
 ];
 
 function initials(name: string) {
@@ -50,12 +53,17 @@ export function AppShell({
         </button>
 
         <nav className="tool-nav">
-          {NAV_ITEMS.map((item) => (
+          {TOOL_NAV_ITEMS.map((item) => (
             <Link key={item.href} href={item.href} className="tool-nav-item">
               <span className="tn-icon">{item.icon}</span> {item.label}
             </Link>
           ))}
           <div className="tool-nav-placeholder">+ Novas ferramentas em breve</div>
+          {UTILITY_NAV_ITEMS.map((item) => (
+            <Link key={item.href} href={item.href} className="tool-nav-item">
+              <span className="tn-icon">{item.icon}</span> {item.label}
+            </Link>
+          ))}
         </nav>
 
         <div className="sidebar-user">
