@@ -13,7 +13,7 @@ Migração feita em fases. Fase atual: fundação + primeiros módulos.
 - [x] Sugestões
 - [x] Aniversariantes
 - [x] Conciliação Bancária Assistida
-- [ ] Calculadora de Estoque
+- [x] Calculadora de Estoque
 - [ ] Gestão de Entregas
 - [ ] Análise Tributária
 - [ ] Agenda da Controladoria

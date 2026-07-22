@@ -7,6 +7,12 @@ const TOOLS = [
     title: "Conciliação Bancária",
     description: "Confronte extrato bancário e relatório de contas por valor, data e descrição, com apoio de IA.",
   },
+  {
+    href: "/estoque",
+    icon: "📊",
+    title: "Calculadora de Estoque",
+    description: "Estima o estoque final quando o cliente não envia controle de estoque, a partir de EI, compras e faturamento.",
+  },
 ];
 
 export default function HomePage() {
@@ -28,7 +34,7 @@ export default function HomePage() {
         <div className="tool-card tool-card-placeholder">
           <span className="tc-icon">+</span>
           <h3>Próxima ferramenta</h3>
-          <p>Calculadora de Estoque, Gestão de Entregas, Análise Tributária, Agenda e Mural chegam nas próximas fases.</p>
+          <p>Gestão de Entregas, Análise Tributária, Agenda e Mural chegam nas próximas fases.</p>
         </div>
       </div>
     </section>
