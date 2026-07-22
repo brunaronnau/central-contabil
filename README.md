@@ -12,7 +12,7 @@ Migração feita em fases. Fase atual: fundação + primeiros módulos.
 - [x] Usuários (gestão de acesso)
 - [x] Sugestões
 - [x] Aniversariantes
-- [ ] Conciliação Bancária Assistida
+- [x] Conciliação Bancária Assistida
 - [ ] Calculadora de Estoque
 - [ ] Gestão de Entregas
 - [ ] Análise Tributária
