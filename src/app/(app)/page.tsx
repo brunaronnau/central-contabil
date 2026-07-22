@@ -19,6 +19,12 @@ const TOOLS = [
     title: "Gestão de Entregas",
     description: "Acompanhamento de entregas conforme relatório extraído do Acessórias.",
   },
+  {
+    href: "/tributaria",
+    icon: "💵",
+    title: "Análise Tributária",
+    description: "Compara cenários de Simples, Presumido e Real para planejamento tributário multi-empresa.",
+  },
 ];
 
 export default function HomePage() {
@@ -40,7 +46,7 @@ export default function HomePage() {
         <div className="tool-card tool-card-placeholder">
           <span className="tc-icon">+</span>
           <h3>Próxima ferramenta</h3>
-          <p>Análise Tributária, Agenda e Mural chegam nas próximas fases.</p>
+          <p>Agenda da Controladoria e Recados &amp; Metas chegam nas próximas fases.</p>
         </div>
       </div>
     </section>

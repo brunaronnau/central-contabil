@@ -1480,3 +1480,489 @@ body.presentation-mode #ent-btnSairApresentacaoFloat {
     font-size: 12px;
   }
 }
+
+/* ---------- Análise Tributária ---------- */
+#tool-fiscal .wrap-at {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+#tool-fiscal .at-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  gap: 6px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  padding: 14px 0;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+#tool-fiscal .at-tab-btn {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 14px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+#tool-fiscal .at-tab-btn.active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+#tool-fiscal #at-headerMeta {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+#tool-fiscal .card {
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  margin-bottom: 20px;
+}
+#tool-fiscal .card h2 {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 14px;
+}
+#tool-fiscal .assumptions {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+#tool-fiscal .assumptions li {
+  margin-bottom: 6px;
+}
+
+#tool-fiscal .company {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+#tool-fiscal .company .head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  background: var(--paper-alt);
+  font-weight: 600;
+  font-size: 13.5px;
+}
+#tool-fiscal .company .body {
+  display: none;
+  padding: 16px;
+  border-top: 1px solid var(--line);
+}
+#tool-fiscal .company.open .body {
+  display: block;
+}
+
+#tool-fiscal .subtabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+#tool-fiscal .subtabs button {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+#tool-fiscal .subtabs button.active {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+#tool-fiscal table.months {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+#tool-fiscal table.months th,
+#tool-fiscal table.months td {
+  padding: 4px 5px;
+  text-align: right;
+  border-bottom: 1px solid var(--line);
+}
+#tool-fiscal table.months th:first-child,
+#tool-fiscal table.months td:first-child {
+  text-align: left;
+}
+#tool-fiscal table.months th {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+#tool-fiscal table.months input {
+  width: 78px;
+  padding: 5px 6px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  text-align: right;
+}
+#tool-fiscal table.months tr.section-header td {
+  background: var(--accent-soft);
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--accent);
+  padding: 6px 8px;
+}
+#tool-fiscal .fill-btn {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: #fff;
+  cursor: pointer;
+  color: var(--ink-soft);
+}
+
+#tool-fiscal .kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+@media (max-width: 820px) {
+  #tool-fiscal .kpis {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+#tool-fiscal .kpis .kpi {
+  position: relative;
+  padding-left: 20px;
+  overflow: hidden;
+}
+#tool-fiscal .kpis .kpi::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent);
+}
+#tool-fiscal .kpis .kpi.highlight::before {
+  background: var(--brass);
+}
+
+#tool-fiscal table.report {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+#tool-fiscal table.report th {
+  background: var(--paper);
+  text-align: left;
+  padding: 9px 11px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--line);
+}
+#tool-fiscal table.report td {
+  padding: 9px 11px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+}
+#tool-fiscal table.report td:first-child {
+  text-align: left;
+}
+#tool-fiscal table.report tr.best {
+  background: var(--success-bg);
+  color: var(--success);
+  font-weight: 600;
+}
+#tool-fiscal table.report tr.total {
+  background: var(--paper);
+  font-weight: 600;
+}
+#tool-fiscal table.report tr.cbs-row {
+  background: #ffe68a;
+}
+#tool-fiscal .badge-best {
+  display: inline-block;
+  background: var(--success);
+  color: #fff;
+  border-radius: 14px;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  margin-left: 8px;
+}
+
+#tool-fiscal .completude-badge {
+  margin-bottom: 18px;
+}
+#tool-fiscal .completude-linha {
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 12.5px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+#tool-fiscal .completude-linha.completude-good {
+  border-color: #beead3;
+  background: var(--success-bg);
+  color: var(--success);
+}
+#tool-fiscal .completude-linha.completude-gold {
+  border-color: #efdfae;
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+#tool-fiscal .completude-linha.completude-danger {
+  border-color: #f0c6c6;
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+#tool-fiscal .chart-box {
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+#tool-fiscal .chart-box h3 {
+  margin: 0 0 14px;
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+#tool-fiscal .dashboard-header {
+  background: linear-gradient(135deg, var(--ink) 0%, #0f151c 100%);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 22px 26px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+#tool-fiscal .dashboard-header h2 {
+  font-family: var(--serif);
+  font-size: 20px;
+  margin: 0 0 4px;
+}
+#tool-fiscal .dashboard-header .sub {
+  color: #aab2bd;
+  font-size: 12.5px;
+}
+
+#tool-fiscal .hero-economia {
+  background: linear-gradient(120deg, var(--success) 0%, #1b5c48 100%);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 26px 30px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 28px rgba(31, 122, 92, 0.25);
+}
+#tool-fiscal .hero-economia .hero-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+#tool-fiscal .hero-economia .hero-value {
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 700;
+  margin: 6px 0;
+}
+#tool-fiscal .hero-economia .hero-sub {
+  font-size: 14px;
+  opacity: 0.92;
+}
+
+/* ---------- Análise Tributária: modo apresentação ---------- */
+body.presentation-mode #tool-fiscal .at-tabs,
+body.presentation-mode #tool-fiscal .completude-badge,
+body.presentation-mode .sidebar,
+body.presentation-mode .tool-header,
+body.presentation-mode .back-link {
+  display: none !important;
+}
+body.presentation-mode #tool-fiscal .wrap-at {
+  max-width: 100%;
+  padding: 20px 40px 60px;
+}
+body.presentation-mode #tool-fiscal .hero-economia .hero-value {
+  font-size: 44px;
+}
+body.presentation-mode #tool-fiscal .hero-economia .hero-sub {
+  font-size: 18px;
+}
+body.presentation-mode #tool-fiscal .kpis .kpi .value {
+  font-size: 28px;
+}
+body.presentation-mode #tool-fiscal .chart-box h3 {
+  font-size: 17px;
+}
+
+/* ---------- Análise Tributária: impressão ---------- */
+.print-only {
+  display: none;
+}
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  #tool-fiscal .at-tabs,
+  #tool-fiscal .no-print,
+  #tool-fiscal .footer-actions,
+  #tool-fiscal .nav-footer {
+    display: none !important;
+  }
+  #tool-fiscal {
+    counter-reset: secaoFiscal;
+  }
+  #tool-fiscal .wrap-at {
+    max-width: 100%;
+    padding: 0;
+  }
+  #tool-fiscal .at-view {
+    display: none !important;
+  }
+  #tool-fiscal .at-view.active {
+    display: block !important;
+  }
+  #tool-fiscal .print-only {
+    display: block !important;
+  }
+  #tool-fiscal .card {
+    border: 1px solid var(--line);
+    box-shadow: none;
+    break-inside: avoid;
+    margin-bottom: 14px;
+    padding: 16px 18px;
+  }
+  #tool-fiscal .card h2 {
+    counter-increment: secaoFiscal;
+    font-size: 13.5px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+  }
+  #tool-fiscal .card h2::before {
+    content: counter(secaoFiscal) ". ";
+    color: var(--brass);
+    font-weight: 700;
+  }
+  #tool-fiscal .chart-box {
+    border: 1px solid var(--line);
+    box-shadow: none;
+    break-inside: avoid;
+    margin-bottom: 14px;
+  }
+  #tool-fiscal table.report,
+  #tool-fiscal table.months {
+    font-size: 10.5px;
+  }
+  #tool-fiscal table.report th,
+  #tool-fiscal table.months th {
+    padding: 5px 6px;
+  }
+  #tool-fiscal table.report td,
+  #tool-fiscal table.months td {
+    padding: 4px 6px;
+  }
+  #tool-fiscal table.report tr,
+  #tool-fiscal table.months tr {
+    break-inside: avoid;
+  }
+  #tool-fiscal .kpis,
+  #tool-fiscal .kpi {
+    break-inside: avoid;
+  }
+  #tool-fiscal .print-cover {
+    display: flex !important;
+    page-break-after: always;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 257mm;
+    text-align: center;
+  }
+  #tool-fiscal .print-cover .eyebrow {
+    margin-bottom: 20px;
+  }
+  #tool-fiscal .print-cover h1 {
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--ink);
+    margin: 0 0 6px;
+  }
+  #tool-fiscal .print-cover .sub {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 40px;
+  }
+  #tool-fiscal .print-cover .campo {
+    font-size: 13px;
+    color: var(--ink);
+    margin: 4px 0;
+  }
+  #tool-fiscal .print-cover .campo b {
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  #tool-fiscal .print-cover .selo {
+    margin-top: 60px;
+    font-size: 10.5px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--brass);
+    font-weight: 700;
+  }
+  #tool-fiscal .print-footer {
+    position: fixed;
+    bottom: 6mm;
+    left: 14mm;
+    right: 14mm;
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--line);
+    padding-top: 4px;
+  }
+  #tool-fiscal .dashboard-header {
+    background: var(--ink) !important;
+  }
+}
