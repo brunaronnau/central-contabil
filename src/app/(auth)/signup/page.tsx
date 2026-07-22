@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { signup, type ActionResult } from "@/app/actions/auth";
+import { resizeImageFile } from "@/lib/resize-image";
 
 const initialState: ActionResult = { error: null };
 
@@ -12,6 +13,18 @@ export default function SignupPage() {
     async (_prev: ActionResult, formData: FormData) => signup(formData),
     initialState,
   );
+  const [photoData, setPhotoData] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  async function handlePhotoChange(file: File) {
+    setPhotoError(null);
+    try {
+      setPhotoData(await resizeImageFile(file, 160));
+    } catch (err) {
+      setPhotoError(err instanceof Error ? err.message : "erro ao processar imagem");
+    }
+  }
 
   return (
     <div className="auth-page">
@@ -23,6 +36,31 @@ export default function SignupPage() {
         {state.error && <div className="auth-error">{state.error}</div>}
 
         <form action={formAction}>
+          <input type="hidden" name="photo" value={photoData ?? ""} />
+          <div className="auth-photo-row">
+            <div className="auth-photo-preview">
+              {photoData ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={photoData} alt="" />
+              ) : (
+                "Foto"
+              )}
+            </div>
+            <div>
+              <button type="button" className="auth-photo-btn" onClick={() => photoInputRef.current?.click()}>
+                Escolher foto
+              </button>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={(e) => e.target.files?.[0] && handlePhotoChange(e.target.files[0])}
+              />
+              {photoError && <p className="small-note" style={{ color: "var(--danger)", marginTop: 4 }}>{photoError}</p>}
+            </div>
+          </div>
+
           <div className="auth-field">
             <label htmlFor="name">Nome completo</label>
             <input id="name" name="name" type="text" required autoComplete="name" />

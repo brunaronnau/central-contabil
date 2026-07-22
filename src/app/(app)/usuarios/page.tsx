@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { deleteUser, toggleAdmin, updateMyName } from "@/app/actions/users";
+import { ProfilePhotoEditor } from "@/components/ProfilePhotoEditor";
 
 function initials(name: string) {
   return name
@@ -14,6 +15,7 @@ function initials(name: string) {
 export default async function UsuariosPage() {
   const me = await requireUser();
   const users = await prisma.user.findMany({ orderBy: { createdAt: "asc" } });
+  const meRecord = users.find((u) => u.id === me.id);
 
   return (
     <section>
@@ -25,6 +27,10 @@ export default async function UsuariosPage() {
       </div>
 
       <div className="wrap" style={{ paddingTop: 32, paddingBottom: 40 }}>
+        <div style={{ maxWidth: 380, marginBottom: 16 }}>
+          <ProfilePhotoEditor photo={meRecord?.photo ?? null} />
+        </div>
+
         <form action={updateMyName} className="sugestao-form" style={{ maxWidth: 380, marginBottom: 28 }}>
           <label htmlFor="name" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--ink-soft)", marginBottom: 6 }}>
             Meu nome de exibição

@@ -33,6 +33,15 @@ export async function deleteUser(userId: string) {
   revalidatePath("/aniversariantes");
 }
 
+export async function updateMyPhoto(photo: string) {
+  const me = await requireUser();
+  await prisma.user.update({ where: { id: me.id }, data: { photo } });
+  revalidatePath("/usuarios");
+  revalidatePath("/aniversariantes");
+  revalidatePath("/sugestoes");
+  revalidatePath("/");
+}
+
 export async function updateMyName(formData: FormData) {
   const me = await requireUser();
   const name = String(formData.get("name") ?? "").trim();

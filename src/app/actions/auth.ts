@@ -18,6 +18,7 @@ const signupSchema = z.object({
     ),
   password: z.string().min(4, "A senha deve ter ao menos 4 caracteres."),
   birthday: z.string().optional(),
+  photo: z.string().startsWith("data:image/").optional().or(z.literal("")),
 });
 
 export type ActionResult = { error: string } | { error: null };
@@ -28,13 +29,14 @@ export async function signup(formData: FormData): Promise<ActionResult> {
     email: formData.get("email"),
     password: formData.get("password"),
     birthday: formData.get("birthday") || undefined,
+    photo: formData.get("photo") || undefined,
   });
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
   }
 
-  const { name, email, password, birthday } = parsed.data;
+  const { name, email, password, birthday, photo } = parsed.data;
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -51,6 +53,7 @@ export async function signup(formData: FormData): Promise<ActionResult> {
       passwordHash,
       isAdmin: userCount === 0,
       birthday: birthday ? new Date(birthday) : null,
+      photo: photo || null,
     },
   });
 
