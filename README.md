@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Central Contábil — Navecon
 
-## Getting Started
+Reformulação da Central Contábil (antes um HTML único com dados só no
+navegador — veja [`legacy/`](./legacy)) para **Next.js + Postgres + Docker**,
+com dados compartilhados entre toda a equipe.
 
-First, run the development server:
+## Status da migração
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Migração feita em fases. Fase atual: fundação + primeiros módulos.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- [x] Fundação: Next.js 16 (App Router), Prisma + Postgres, Docker Compose, login (Auth.js)
+- [x] Usuários (gestão de acesso)
+- [x] Sugestões
+- [x] Aniversariantes
+- [ ] Conciliação Bancária Assistida
+- [ ] Calculadora de Estoque
+- [ ] Gestão de Entregas
+- [ ] Análise Tributária
+- [ ] Agenda da Controladoria
+- [ ] Recados & Metas (Mural)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Rodando localmente (com Docker)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Copie `.env.example` para `.env` e ajuste se necessário (os valores padrão já funcionam para uso local).
+2. Suba o Postgres e a aplicação:
 
-## Learn More
+   ```bash
+   docker compose up --build
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. Acesse http://localhost:3000 — a primeira pessoa a criar uma conta vira administradora automaticamente.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Migrations do Prisma rodam sozinhas ao subir o container `app` (veja `docker-entrypoint.sh`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Rodando localmente (sem Docker, para desenvolvimento)
 
-## Deploy on Vercel
+1. Suba só o banco: `docker compose up -d db`
+2. Instale as dependências: `npm install`
+3. Aplique as migrations: `npx prisma migrate dev`
+4. Rode o app em modo dev: `npm run dev`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Next.js 16** (App Router, TypeScript, Server Actions)
+- **Prisma 7** com driver adapter (`@prisma/adapter-pg`) para Postgres
+- **Auth.js (NextAuth v5)** — login por e-mail/senha (só e-mails `@navecon.net.br`), com `bcryptjs` para hash de senha
+- **Docker Compose** — serviços `app` (Next.js) e `db` (Postgres 16)
+
+## Estrutura
+
+- `src/app/(auth)/` — login e cadastro (páginas públicas)
+- `src/app/(app)/` — páginas autenticadas (usam o layout com a barra lateral)
+- `src/app/actions/` — Server Actions (mutações)
+- `src/lib/` — Prisma client, helpers de sessão
+- `prisma/schema.prisma` — schema do banco
+- `legacy/` — HTML original, mantido como referência para migrar os módulos que faltam
