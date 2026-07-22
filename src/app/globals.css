@@ -61,7 +61,7 @@ body {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #8891a0;
-  margin: 0;
+  margin: 8px 0 0;
 }
 .tool-nav {
   display: flex;
@@ -264,6 +264,21 @@ body {
   max-width: 380px;
   padding: 32px 30px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+.logo {
+  height: 46px;
+  width: auto;
+  display: block;
+}
+.sidebar .logo {
+  height: 36px;
+  width: auto;
+}
+.auth-box .logo {
+  height: 34px;
+  width: auto;
+  display: block;
+  margin: 0 auto 18px;
 }
 .auth-title {
   font-family: var(--serif);

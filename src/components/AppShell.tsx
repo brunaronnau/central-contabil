@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { signOutAction } from "@/app/actions/auth-signout";
 
@@ -35,6 +36,7 @@ export function AppShell({
     <div className="app-shell">
       <aside className="sidebar">
         <div>
+          <Image src="/navecon-logo.png" alt="Navecon" width={191} height={36} className="logo" priority />
           <p className="sidebar-title">Central Contábil</p>
         </div>
 
