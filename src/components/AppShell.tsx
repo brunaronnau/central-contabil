@@ -40,6 +40,15 @@ export function AppShell({
           <p className="sidebar-title">Central Contábil</p>
         </div>
 
+        <button
+          type="button"
+          className="notif-bell"
+          title="Notificações: em breve, quando a Agenda da Controladoria e o Mural forem migrados"
+        >
+          <span className="nb-icon">🔔</span>
+          <span className="nb-label">Notificações</span>
+        </button>
+
         <nav className="tool-nav">
           {NAV_ITEMS.map((item) => (
             <Link key={item.href} href={item.href} className="tool-nav-item">

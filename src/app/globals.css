@@ -63,6 +63,34 @@ body {
   color: #8891a0;
   margin: 8px 0 0;
 }
+.notif-bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  color: #edeff2;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 9px 12px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.notif-bell:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.notif-bell .nb-icon {
+  font-size: 14px;
+  flex: none;
+}
+.notif-bell .nb-label {
+  flex: 1;
+  text-align: left;
+}
 .tool-nav {
   display: flex;
   flex-direction: column;
