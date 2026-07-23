@@ -1,10 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import type { requireUser } from "@/lib/session";
 import { createVotacao, deleteVotacao, voteVotacao } from "@/app/actions/mural-votacoes";
 import { ExportPollButton } from "./ExportPollButton";
 
-export async function VotacoesBlock() {
-  const me = await requireUser();
+export async function VotacoesBlock({ me }: { me: Awaited<ReturnType<typeof requireUser>> }) {
   const votacoes = await prisma.votacao.findMany({
     include: { author: true, opcoes: { orderBy: { ordem: "asc" }, include: { votos: { include: { user: true } } } } },
     orderBy: { createdAt: "desc" },

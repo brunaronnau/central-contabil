@@ -4,7 +4,7 @@ import { VotacoesBlock } from "@/components/mural/VotacoesBlock";
 import { MetasBlock } from "@/components/mural/MetasBlock";
 
 export default async function MuralPage() {
-  await requireUser();
+  const me = await requireUser();
 
   return (
     <section>
@@ -16,10 +16,10 @@ export default async function MuralPage() {
       </div>
 
       <div className="wrap" style={{ paddingTop: 32, paddingBottom: 40 }}>
-        <RecadosBlock />
+        <RecadosBlock me={me} />
         <div className="mural-two-col">
-          <VotacoesBlock />
-          <MetasBlock />
+          <VotacoesBlock me={me} />
+          <MetasBlock me={me} />
         </div>
       </div>
     </section>

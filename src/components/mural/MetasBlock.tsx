@@ -1,9 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import type { requireUser } from "@/lib/session";
 import { addMetaNote, alertMeta, concludeMeta, createMeta, deleteMeta } from "@/app/actions/mural-metas";
 
-export async function MetasBlock() {
-  const me = await requireUser();
+export async function MetasBlock({ me }: { me: Awaited<ReturnType<typeof requireUser>> }) {
   const metasRaw = await prisma.meta.findMany({
     include: { author: true, notas: { include: { author: true }, orderBy: { createdAt: "asc" } } },
   });

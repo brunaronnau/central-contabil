@@ -65,6 +65,9 @@ export async function addMetaNote(metaId: string, formData: FormData) {
   const text = String(formData.get("text") ?? "").trim();
   if (!text) return;
 
+  const meta = await prisma.meta.findUnique({ where: { id: metaId }, select: { id: true } });
+  if (!meta) return;
+
   await prisma.metaNota.create({ data: { metaId, text, tipo: "NOTA", authorId: user.id } });
   revalidatePath("/mural");
 }

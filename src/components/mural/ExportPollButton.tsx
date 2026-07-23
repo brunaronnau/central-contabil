@@ -48,7 +48,13 @@ export function ExportPollButton({ poll }: { poll: PollForExport }) {
       }
     });
 
-    const nomeArquivo = `votacao_${poll.titulo.toLowerCase().replace(/[^a-z0-9]+/g, "_").slice(0, 40)}.pdf`;
+    const slug = poll.titulo
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .slice(0, 40);
+    const nomeArquivo = `votacao_${slug}.pdf`;
     doc.save(nomeArquivo);
   }
 

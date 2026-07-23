@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import type { requireUser } from "@/lib/session";
 import { createRecado, deleteRecado, reactToRecado, togglePinRecado } from "@/app/actions/mural-recados";
 
 function initials(name: string) {
@@ -27,11 +27,17 @@ const REACOES: { tipo: "LIKE" | "HEART" | "DISLIKE"; emoji: string }[] = [
   { tipo: "DISLIKE", emoji: "👎" },
 ];
 
-export async function RecadosBlock() {
-  const me = await requireUser();
+export async function RecadosBlock({ me }: { me: Awaited<ReturnType<typeof requireUser>> }) {
   const recados = await prisma.recado.findMany({
     where: { expiresAt: { gt: new Date() } },
-    include: { author: true, anexos: true, reacoes: true },
+    include: {
+      author: true,
+      // Sem "dados" aqui: cada anexo pode ter até 5MB em base64, e essa lista
+      // é montada em toda visita à página — o conteúdo só é lido sob demanda,
+      // pela rota de download (api/mural/anexo/[id]).
+      anexos: { select: { id: true, nome: true, tipo: true, tamanho: true } },
+      reacoes: true,
+    },
     orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
   });
 
@@ -46,7 +52,7 @@ export async function RecadosBlock() {
         <summary className="btn secondary" style={{ display: "inline-block", marginBottom: 16, cursor: "pointer" }}>
           + Novo recado
         </summary>
-        <form action={createRecado} className="mural-form open" encType="multipart/form-data">
+        <form action={createRecado} className="mural-form open">
           <div className="mural-form-row">
             <label htmlFor="recado-text">Mensagem</label>
             <textarea id="recado-text" name="text" required maxLength={2000} />
@@ -64,7 +70,7 @@ export async function RecadosBlock() {
               </select>
             </div>
             <div className="mural-form-row">
-              <label htmlFor="recado-files">Anexos (opcional, até 5MB cada)</label>
+              <label htmlFor="recado-files">Anexos (opcional, até 5MB cada, 7MB no total)</label>
               <input id="recado-files" type="file" name="files" multiple />
             </div>
           </div>
@@ -110,7 +116,7 @@ export async function RecadosBlock() {
                   {r.anexos.length > 0 && (
                     <div className="recado-attachments">
                       {r.anexos.map((a) => (
-                        <a key={a.id} className="recado-attach-chip" href={`data:${a.tipo};base64,${a.dados}`} download={a.nome}>
+                        <a key={a.id} className="recado-attach-chip" href={`/api/mural/anexo/${a.id}`} download={a.nome}>
                           📎 {a.nome}
                         </a>
                       ))}

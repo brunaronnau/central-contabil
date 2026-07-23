@@ -45,6 +45,9 @@ export async function voteVotacao(votacaoId: string, opcaoId: string) {
   if (!votacao) return;
   if (votacao.encerraEm <= new Date()) throw new Error("Esta votação já foi encerrada.");
 
+  const opcao = await prisma.votacaoOpcao.findUnique({ where: { id: opcaoId } });
+  if (!opcao || opcao.votacaoId !== votacaoId) throw new Error("Opção inválida para esta votação.");
+
   await prisma.votacaoVoto.upsert({
     where: { votacaoId_userId: { votacaoId, userId: user.id } },
     create: { votacaoId, opcaoId, userId: user.id },

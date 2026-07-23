@@ -6,6 +6,9 @@ import { requireUser } from "@/lib/session";
 import type { ReacaoTipo } from "@/generated/prisma/enums";
 
 const MURAL_MAX_FILE_BYTES = 5 * 1024 * 1024;
+// Abaixo do bodySizeLimit de 8mb das server actions (next.config.ts) — sobra
+// margem para o texto e o overhead do multipart/form-data.
+const MURAL_MAX_TOTAL_BYTES = 7 * 1024 * 1024;
 
 export async function createRecado(formData: FormData) {
   const user = await requireUser();
@@ -17,10 +20,15 @@ export async function createRecado(formData: FormData) {
   const expiresAt = new Date(Date.now() + duracaoHoras * 3600000);
 
   const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+  let totalBytes = 0;
   for (const file of files) {
     if (file.size > MURAL_MAX_FILE_BYTES) {
       throw new Error(`O arquivo "${file.name}" excede o limite de 5MB.`);
     }
+    totalBytes += file.size;
+  }
+  if (totalBytes > MURAL_MAX_TOTAL_BYTES) {
+    throw new Error(`Os anexos somam ${(totalBytes / 1024 / 1024).toFixed(1)}MB — o limite total é 7MB por recado.`);
   }
 
   const recado = await prisma.recado.create({
