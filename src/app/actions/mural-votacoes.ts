@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
+import { notify } from "@/lib/notify";
 
 export async function createVotacao(formData: FormData) {
   const user = await requireUser();
@@ -24,6 +25,14 @@ export async function createVotacao(formData: FormData) {
       authorId: user.id,
       opcoes: { create: opcoes.map((texto, i) => ({ texto, ordem: i })) },
     },
+  });
+
+  await notify({
+    kind: "votacao",
+    titulo: `Nova votação: ${titulo}`,
+    sub: `Criada por ${user.name}`,
+    href: "/mural",
+    excludeUserId: user.id,
   });
 
   revalidatePath("/mural");
@@ -55,4 +64,33 @@ export async function voteVotacao(votacaoId: string, opcaoId: string) {
   });
 
   revalidatePath("/mural");
+}
+
+/**
+ * Sem um processo em segundo plano no servidor, o encerramento de uma
+ * votação só é percebido quando alguém está com o Mural aberto — chamada
+ * pelo MuralAutoRefresh a cada 60s e também ao carregar a página.
+ */
+export async function checkVotacoesEncerradas() {
+  await requireUser();
+
+  const pendentes = await prisma.votacao.findMany({
+    where: { encerraEm: { lte: new Date() }, notificouEncerramento: false },
+    include: { opcoes: { include: { votos: true } } },
+  });
+  if (pendentes.length === 0) return;
+
+  for (const votacao of pendentes) {
+    const maisVotada = [...votacao.opcoes].sort((a, b) => b.votos.length - a.votos.length)[0];
+    const sub =
+      maisVotada && maisVotada.votos.length > 0
+        ? `Mais votada: ${maisVotada.texto} (${maisVotada.votos.length} voto${maisVotada.votos.length === 1 ? "" : "s"})`
+        : "Ninguém votou.";
+    await notify({ kind: "votacao", titulo: `Votação encerrada: ${votacao.titulo}`, sub, href: "/mural" });
+    await prisma.votacao.update({ where: { id: votacao.id }, data: { notificouEncerramento: true } });
+  }
+  // Sem revalidatePath aqui de propósito: essa função também é chamada durante o
+  // render da própria página do Mural (onde revalidatePath não é permitido) — o
+  // caller cuida de atualizar a tela (router.refresh() no MuralAutoRefresh, ou o
+  // próprio render da página já busca os dados atualizados em seguida).
 }

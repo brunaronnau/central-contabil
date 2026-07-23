@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
+import { notify } from "@/lib/notify";
 import type { ReacaoTipo } from "@/generated/prisma/enums";
 
 const MURAL_MAX_FILE_BYTES = 5 * 1024 * 1024;
@@ -47,6 +48,14 @@ export async function createRecado(formData: FormData) {
       },
     });
   }
+
+  await notify({
+    kind: "recado",
+    titulo: `Novo recado de ${user.name}`,
+    sub: text.slice(0, 90),
+    href: "/mural",
+    excludeUserId: user.id,
+  });
 
   revalidatePath("/mural");
 }

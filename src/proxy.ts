@@ -25,6 +25,9 @@ export const config = {
   // Também exclui arquivos estáticos em /public (ex: a logo) — sem isso, o
   // otimizador de imagem do Next (que busca a imagem local via uma requisição
   // interna) cai na regra de autenticação e recebe a página de login no lugar
-  // da imagem, quebrando o <Image> em qualquer lugar do app.
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)$).*)"],
+  // da imagem, quebrando o <Image> em qualquer lugar do app. sw.js (service
+  // worker das notificações push) também precisa ficar de fora: o navegador
+  // revalida esse arquivo periodicamente por conta própria, e se receber um
+  // redirect para /login em vez do JS, ele desregistra o service worker.
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|sw\\.js|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)$).*)"],
 };

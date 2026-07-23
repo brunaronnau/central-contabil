@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
+import { notify } from "@/lib/notify";
 
 export async function createMeta(formData: FormData) {
   const user = await requireUser();
@@ -23,6 +24,14 @@ export async function createMeta(formData: FormData) {
       reward: reward || null,
       authorId: user.id,
     },
+  });
+
+  await notify({
+    kind: "meta",
+    titulo: `Nova meta: ${titulo}`,
+    sub: `Criada por ${user.name}`,
+    href: "/mural",
+    excludeUserId: user.id,
   });
 
   revalidatePath("/mural");
@@ -57,6 +66,14 @@ export async function concludeMeta(metaId: string) {
     },
   });
 
+  await notify({
+    kind: "meta",
+    titulo: `Meta concluída: ${meta.titulo}`,
+    sub: `Por ${user.name}`,
+    href: "/mural",
+    excludeUserId: user.id,
+  });
+
   revalidatePath("/mural");
 }
 
@@ -80,5 +97,14 @@ export async function alertMeta(metaId: string, formData: FormData) {
 
   const text = String(formData.get("text") ?? "").trim() || "Atenção necessária nesta meta!";
   await prisma.metaNota.create({ data: { metaId, text: `⚠️ ${text}`, tipo: "ALERTA", authorId: user.id } });
+
+  await notify({
+    kind: "alerta",
+    titulo: `Atenção: ${meta.titulo}`,
+    sub: text,
+    href: "/mural",
+    excludeUserId: user.id,
+  });
+
   revalidatePath("/mural");
 }

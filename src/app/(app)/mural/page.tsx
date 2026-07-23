@@ -3,9 +3,11 @@ import { RecadosBlock } from "@/components/mural/RecadosBlock";
 import { VotacoesBlock } from "@/components/mural/VotacoesBlock";
 import { MetasBlock } from "@/components/mural/MetasBlock";
 import { MuralAutoRefresh } from "@/components/mural/MuralAutoRefresh";
+import { checkVotacoesEncerradas } from "@/app/actions/mural-votacoes";
 
 export default async function MuralPage() {
   const me = await requireUser();
+  await checkVotacoesEncerradas();
 
   return (
     <section>

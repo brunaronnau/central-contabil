@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { signOutAction } from "@/app/actions/auth-signout";
+import { NotifBell } from "@/components/NotifBell";
 
 type NavItem = {
   href: string;
@@ -48,14 +49,7 @@ export function AppShell({
           <p className="sidebar-title">Central Contábil</p>
         </div>
 
-        <button
-          type="button"
-          className="notif-bell"
-          title="Notificações: em breve, quando a Agenda da Controladoria e o Mural forem migrados"
-        >
-          <span className="nb-icon">🔔</span>
-          <span className="nb-label">Notificações</span>
-        </button>
+        <NotifBell />
 
         <nav className="tool-nav">
           {TOOL_NAV_ITEMS.map((item) => (

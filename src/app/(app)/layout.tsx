@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { AppShell } from "@/components/AppShell";
+import { checkAniversariosHoje } from "@/lib/aniversarios-notify";
 
 export default async function AppLayout({
   children,
@@ -12,6 +13,7 @@ export default async function AppLayout({
     where: { id: sessionUser.id },
     select: { name: true, email: true, photo: true },
   });
+  await checkAniversariosHoje();
 
   return (
     <AppShell

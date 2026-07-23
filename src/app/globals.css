@@ -155,6 +155,149 @@ body {
   color: #6c7484;
   line-height: 1.5;
 }
+
+/* ---------- Central de notificações ---------- */
+.notif-bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  color: #edeff2;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+.notif-bell:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.notif-bell .nb-icon {
+  font-size: 14px;
+  flex: none;
+}
+.notif-bell .nb-label {
+  flex: 1;
+  text-align: left;
+}
+.nb-badge {
+  width: 9px;
+  height: 9px;
+  min-width: 9px;
+  border-radius: 50%;
+  background: #f5b400;
+  flex: none;
+  box-shadow: 0 0 0 0 rgba(245, 180, 0, 0.65);
+  animation: nbDotPulse 1.4s infinite;
+}
+@keyframes nbDotPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 180, 0, 0.65);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(245, 180, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 180, 0, 0);
+  }
+}
+.notif-panel {
+  position: fixed;
+  left: 20px;
+  bottom: 132px;
+  width: 340px;
+  max-height: 420px;
+  background: var(--paper-alt);
+  color: var(--ink);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.notif-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+.notif-panel-head span {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 14px;
+}
+.notif-panel-head button {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  white-space: nowrap;
+}
+.notif-push-ok {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--success);
+}
+.notif-panel-list {
+  overflow-y: auto;
+  padding: 6px;
+}
+.notif-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  align-items: flex-start;
+}
+.notif-item:hover {
+  background: var(--paper);
+}
+.notif-item .ni-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+  margin-top: 5px;
+}
+.notif-item .ni-dot.read {
+  background: var(--line);
+}
+.notif-item .ni-body {
+  flex: 1;
+  min-width: 0;
+}
+.notif-item .ni-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.notif-item .ni-meta {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  margin-top: 3px;
+}
+.notif-panel-empty {
+  padding: 26px 16px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+}
 .main-area {
   flex: 1;
   min-width: 0;
@@ -2658,6 +2801,10 @@ body.presentation-mode #tool-fiscal .chart-box h3 {
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
+}
+.recado-reactions {
+  display: flex;
+  gap: 6px;
 }
 .recado-actions {
   margin-left: auto;
