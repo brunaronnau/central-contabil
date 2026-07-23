@@ -71,7 +71,9 @@ export function ViewRelatorio({
   return (
     <section className="at-view active">
       <div className="print-cover print-only">
-        <span className="eyebrow">CENTRAL CONTÁBIL · NAVECON</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/navecon-logo.png" alt="Navecon Contabilidade e Assessoria" className="print-cover-logo" />
+        <div className="print-cover-rule" />
         <h1>Relatório de Análise Tributária</h1>
         <p className="sub">Comparativo entre regimes tributários</p>
         <p className="campo">

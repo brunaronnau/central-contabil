@@ -1919,13 +1919,16 @@ body.presentation-mode #ent-btnSairApresentacaoFloat {
 }
 #tool-fiscal table.report th {
   background: var(--paper);
-  text-align: left;
+  text-align: right;
   padding: 9px 11px;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--ink-soft);
   border-bottom: 1px solid var(--line);
+}
+#tool-fiscal table.report th:first-child {
+  text-align: left;
 }
 #tool-fiscal table.report td {
   padding: 9px 11px;
@@ -2139,8 +2142,16 @@ body.presentation-mode #tool-fiscal .chart-box h3 {
     height: 257mm;
     text-align: center;
   }
-  #tool-fiscal .print-cover .eyebrow {
-    margin-bottom: 20px;
+  #tool-fiscal .print-cover-logo {
+    width: 260px;
+    height: auto;
+    margin-bottom: 26px;
+  }
+  #tool-fiscal .print-cover-rule {
+    width: 70px;
+    height: 3px;
+    margin-bottom: 28px;
+    background: linear-gradient(90deg, #8a6d3b, #d4af6a, #8a6d3b);
   }
   #tool-fiscal .print-cover h1 {
     font-family: var(--serif);
@@ -2179,7 +2190,7 @@ body.presentation-mode #tool-fiscal .chart-box h3 {
     justify-content: space-between;
     font-size: 9px;
     color: var(--ink-soft);
-    border-top: 1px solid var(--line);
+    border-top: 2px solid #8a6d3b;
     padding-top: 4px;
   }
   #tool-fiscal .dashboard-header {

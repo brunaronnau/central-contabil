@@ -94,7 +94,7 @@ export function TributariaClient() {
 
   return (
     <section id="tool-fiscal">
-      <header className="tool-header">
+      <header className="tool-header no-print">
         <div className="wrap">
           <h1>Análise Tributária Comparativa</h1>
           <p>

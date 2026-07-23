@@ -94,7 +94,13 @@ export function fmtBRL(v: number): string {
 }
 
 export function fmtPct(v: number): string {
-  return (isNaN(v) ? 0 : v).toLocaleString("pt-BR", { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const pct = (isNaN(v) ? 0 : v) * 100;
+  // Trunca em 2 casas decimais em vez de arredondar: toFixed(6) primeiro elimina
+  // ruído de ponto flutuante (ex.: 14.499999999999998), depois cortamos a string
+  // na 2ª casa sem deixar o toLocaleString arredondar o 3º dígito pra cima.
+  const dotIndex = pct.toFixed(6).indexOf(".");
+  const truncated = Number(pct.toFixed(6).slice(0, dotIndex + 3));
+  return `${truncated.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
 }
 
 /* ==================== Helpers de array ==================== */
