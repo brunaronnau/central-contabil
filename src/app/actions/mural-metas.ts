@@ -79,6 +79,6 @@ export async function alertMeta(metaId: string, formData: FormData) {
   if (!podeGerenciarMeta(meta, user)) throw new Error("Você não pode disparar alerta nesta meta.");
 
   const text = String(formData.get("text") ?? "").trim() || "Atenção necessária nesta meta!";
-  await prisma.metaNota.create({ data: { metaId, text, tipo: "ALERTA", authorId: user.id } });
+  await prisma.metaNota.create({ data: { metaId, text: `⚠️ ${text}`, tipo: "ALERTA", authorId: user.id } });
   revalidatePath("/mural");
 }

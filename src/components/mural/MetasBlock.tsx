@@ -1,6 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import type { requireUser } from "@/lib/session";
-import { addMetaNote, alertMeta, concludeMeta, createMeta, deleteMeta } from "@/app/actions/mural-metas";
+import { addMetaNote, concludeMeta, createMeta, deleteMeta } from "@/app/actions/mural-metas";
+import { AlertMetaButton } from "./AlertMetaButton";
+import { ConfirmForm } from "./ConfirmForm";
+
+function fmtData(d: Date | null): string {
+  return d ? d.toLocaleDateString("pt-BR") : "—";
+}
 
 export async function MetasBlock({ me }: { me: Awaited<ReturnType<typeof requireUser>> }) {
   const metasRaw = await prisma.meta.findMany({
@@ -17,9 +23,9 @@ export async function MetasBlock({ me }: { me: Awaited<ReturnType<typeof require
   hoje.setHours(0, 0, 0, 0);
 
   return (
-    <div className="mural-block">
+    <div className="mural-block mural-block-highlight" id="block-metas">
       <div className="mural-block-head">
-        <h2>Metas</h2>
+        <h2>🎯 Metas da equipe</h2>
         <span className="small-note">{metas.filter((m) => m.status === "ABERTA").length} aberta(s)</span>
       </div>
 
@@ -38,16 +44,16 @@ export async function MetasBlock({ me }: { me: Awaited<ReturnType<typeof require
           </div>
           <div className="mural-form-grid">
             <div className="mural-form-row">
-              <label htmlFor="meta-start">Início (opcional)</label>
+              <label htmlFor="meta-start">Prazo inicial</label>
               <input id="meta-start" type="date" name="startDate" />
             </div>
             <div className="mural-form-row">
-              <label htmlFor="meta-end">Prazo</label>
+              <label htmlFor="meta-end">Prazo final</label>
               <input id="meta-end" type="date" name="endDate" required />
             </div>
           </div>
           <div className="mural-form-row">
-            <label htmlFor="meta-reward">Recompensa (opcional)</label>
+            <label htmlFor="meta-reward">Recompensa</label>
             <input id="meta-reward" type="text" name="reward" maxLength={200} />
           </div>
           <div className="mural-form-actions">
@@ -76,20 +82,23 @@ export async function MetasBlock({ me }: { me: Awaited<ReturnType<typeof require
                 {m.descricao && <p className="goal-desc">{m.descricao}</p>}
                 <div className="goal-meta-row">
                   <span>
-                    <b>Prazo:</b> {m.endDate.toLocaleDateString("pt-BR")}
+                    Início: <b>{fmtData(m.startDate)}</b>
                   </span>
                   <span>
-                    <b>Responsável:</b> {m.author?.name ?? "Usuário removido"}
+                    Prazo final: <b>{fmtData(m.endDate)}</b>
+                  </span>
+                  <span>
+                    Criada por: <b>{m.author?.name ?? "Usuário removido"}</b>
                   </span>
                 </div>
-                {m.reward && <div className="goal-reward">🎁 {m.reward}</div>}
+                {m.reward && <div className="goal-reward">🏆 Recompensa: {m.reward}</div>}
 
                 {m.notas.length > 0 && (
                   <div className="goal-notes">
                     {m.notas.map((n) => (
                       <div key={n.id} className={`goal-note tipo-${n.tipo.toLowerCase()}`}>
                         <div className="gn-meta">
-                          {n.author?.name ?? "Usuário removido"} · {n.createdAt.toLocaleDateString("pt-BR")}
+                          {n.author?.name ?? "Usuário removido"} · {fmtData(n.createdAt)}
                         </div>
                         {n.text}
                       </div>
@@ -97,34 +106,30 @@ export async function MetasBlock({ me }: { me: Awaited<ReturnType<typeof require
                   </div>
                 )}
 
-                <form action={addMetaNote.bind(null, m.id)} className="goal-note-form">
-                  <input type="text" name="text" placeholder="Adicionar observação..." maxLength={500} />
-                  <button type="submit" className="btn secondary" style={{ padding: "7px 14px", fontSize: 12 }}>
-                    Comentar
-                  </button>
-                </form>
+                {m.status === "ABERTA" && (
+                  <form action={addMetaNote.bind(null, m.id)} className="goal-note-form">
+                    <input type="text" name="text" placeholder="Adicionar observação..." maxLength={500} />
+                    <button type="submit" className="btn secondary">
+                      Adicionar
+                    </button>
+                  </form>
+                )}
 
                 {canManage && (
                   <div className="goal-actions">
                     {m.status === "ABERTA" && (
-                      <form action={concludeMeta.bind(null, m.id)}>
+                      <ConfirmForm action={concludeMeta.bind(null, m.id)} confirmMessage="Marcar esta meta como concluída?">
                         <button type="submit" className="btn">
-                          Concluir
+                          Marcar como concluída
                         </button>
-                      </form>
+                      </ConfirmForm>
                     )}
-                    {m.status === "ABERTA" && (
-                      <form action={alertMeta.bind(null, m.id)}>
-                        <button type="submit" className="btn alert-btn">
-                          Disparar alerta
-                        </button>
-                      </form>
-                    )}
-                    <form action={deleteMeta.bind(null, m.id)}>
-                      <button type="submit" className="btn secondary">
-                        Excluir
+                    {m.status === "ABERTA" && <AlertMetaButton metaId={m.id} />}
+                    <ConfirmForm action={deleteMeta.bind(null, m.id)} confirmMessage="Excluir esta meta e todo o seu histórico?">
+                      <button type="submit" className="btn secondary" style={{ color: "var(--danger)", borderColor: "var(--danger)" }}>
+                        excluir
                       </button>
-                    </form>
+                    </ConfirmForm>
                   </div>
                 )}
               </div>

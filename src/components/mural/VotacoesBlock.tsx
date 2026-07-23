@@ -1,12 +1,25 @@
 import { prisma } from "@/lib/prisma";
 import type { requireUser } from "@/lib/session";
-import { createVotacao, deleteVotacao, voteVotacao } from "@/app/actions/mural-votacoes";
+import { deleteVotacao, voteVotacao } from "@/app/actions/mural-votacoes";
 import { ExportPollButton } from "./ExportPollButton";
+import { NovaVotacaoForm } from "./NovaVotacaoForm";
+import { ConfirmForm } from "./ConfirmForm";
+
+function fmtDataHora(d: Date): string {
+  return `${d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} ${d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
+}
 
 export async function VotacoesBlock({ me }: { me: Awaited<ReturnType<typeof requireUser>> }) {
-  const votacoes = await prisma.votacao.findMany({
+  const votacoesRaw = await prisma.votacao.findMany({
     include: { author: true, opcoes: { orderBy: { ordem: "asc" }, include: { votos: { include: { user: true } } } } },
-    orderBy: { createdAt: "desc" },
+  });
+
+  const now = new Date().getTime();
+  const votacoes = votacoesRaw.sort((a, b) => {
+    const aClosed = now >= a.encerraEm.getTime();
+    const bClosed = now >= b.encerraEm.getTime();
+    if (aClosed !== bClosed) return aClosed ? 1 : -1;
+    return aClosed ? b.encerraEm.getTime() - a.encerraEm.getTime() : a.encerraEm.getTime() - b.encerraEm.getTime();
   });
 
   return (
@@ -16,42 +29,7 @@ export async function VotacoesBlock({ me }: { me: Awaited<ReturnType<typeof requ
         <span className="small-note">{votacoes.length} no total</span>
       </div>
 
-      <details>
-        <summary className="btn secondary" style={{ display: "inline-block", marginBottom: 16, cursor: "pointer" }}>
-          + Nova votação
-        </summary>
-        <form action={createVotacao} className="mural-form open">
-          <div className="mural-form-row">
-            <label htmlFor="poll-titulo">Pergunta</label>
-            <input id="poll-titulo" type="text" name="titulo" required maxLength={200} />
-          </div>
-          <div className="mural-form-row">
-            <label>Opções (mín. 2)</label>
-            <div className="mural-poll-options">
-              <input type="text" name="opcoes" placeholder="Opção 1" required className="text-input" />
-              <input type="text" name="opcoes" placeholder="Opção 2" required className="text-input" />
-              <input type="text" name="opcoes" placeholder="Opção 3 (opcional)" className="text-input" />
-              <input type="text" name="opcoes" placeholder="Opção 4 (opcional)" className="text-input" />
-              <input type="text" name="opcoes" placeholder="Opção 5 (opcional)" className="text-input" />
-              <input type="text" name="opcoes" placeholder="Opção 6 (opcional)" className="text-input" />
-            </div>
-          </div>
-          <div className="mural-form-row">
-            <label htmlFor="poll-duration">Encerra em</label>
-            <select id="poll-duration" name="duration" defaultValue={72}>
-              <option value={24}>1 dia</option>
-              <option value={72}>3 dias</option>
-              <option value={168}>7 dias</option>
-              <option value={336}>14 dias</option>
-            </select>
-          </div>
-          <div className="mural-form-actions">
-            <button type="submit" className="btn">
-              Publicar votação
-            </button>
-          </div>
-        </form>
-      </details>
+      <NovaVotacaoForm />
 
       {votacoes.length === 0 ? (
         <div className="empty-state">Nenhuma votação criada ainda.</div>
@@ -68,15 +46,16 @@ export async function VotacoesBlock({ me }: { me: Awaited<ReturnType<typeof requ
               <div key={p.id} className={`poll-card${fechada ? " closed" : ""}`}>
                 <div className="poll-head">
                   <h3 className="poll-title">{p.titulo}</h3>
-                  <span className={`poll-status ${fechada ? "closed-tag" : "open"}`}>{fechada ? "Encerrada" : "Aberta"}</span>
+                  <span className={`poll-status ${fechada ? "closed-tag" : "open"}`}>{fechada ? "encerrada" : "aberta"}</span>
                 </div>
                 <div className="poll-meta">
-                  {authorName} · {totalVotos} voto(s) · {fechada ? "encerrada em" : "encerra em"} {p.encerraEm.toLocaleDateString("pt-BR")}
+                  {authorName} · {totalVotos} voto(s) · {fechada ? "encerrou em" : "encerra em"} {fmtDataHora(p.encerraEm)}
                 </div>
                 <div className="poll-options">
                   {p.opcoes.map((op) => {
                     const pct = totalVotos > 0 ? Math.round((op.votos.length / totalVotos) * 100) : 0;
                     const votou = meuVoto === op.id;
+                    const votantes = op.votos.map((v) => v.user?.name ?? "Usuário removido");
                     return (
                       <div key={op.id} className="poll-opt-wrap">
                         <form action={voteVotacao.bind(null, p.id, op.id)}>
@@ -88,16 +67,20 @@ export async function VotacoesBlock({ me }: { me: Awaited<ReturnType<typeof requ
                                 {op.texto}
                               </span>
                               <span className="pct">
-                                {op.votos.length} · {pct}%
+                                {pct}% ({op.votos.length})
                               </span>
                             </span>
                           </button>
                         </form>
+                        <div className="poll-opt-voters">{votantes.length ? `👤 ${votantes.join(", ")}` : "Ninguém votou ainda"}</div>
                       </div>
                     );
                   })}
                 </div>
                 <div className="poll-footer">
+                  <span className="small-note">
+                    {fechada ? "" : meuVoto ? "Você já votou — clique noutra opção para trocar." : "Clique numa opção para votar."}
+                  </span>
                   <div className="poll-footer-actions">
                     <ExportPollButton
                       poll={{
@@ -107,14 +90,14 @@ export async function VotacoesBlock({ me }: { me: Awaited<ReturnType<typeof requ
                         opcoes: p.opcoes.map((o) => ({ texto: o.texto, votantes: o.votos.map((v) => v.user?.name ?? "Usuário removido") })),
                       }}
                     />
+                    {canManage && (
+                      <ConfirmForm action={deleteVotacao.bind(null, p.id)} confirmMessage="Excluir esta votação?">
+                        <button type="submit" className="poll-del">
+                          excluir
+                        </button>
+                      </ConfirmForm>
+                    )}
                   </div>
-                  {canManage && (
-                    <form action={deleteVotacao.bind(null, p.id)}>
-                      <button type="submit" className="poll-del">
-                        excluir
-                      </button>
-                    </form>
-                  )}
                 </div>
               </div>
             );

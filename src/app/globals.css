@@ -2488,10 +2488,62 @@ body.presentation-mode #tool-fiscal .chart-box h3 {
   align-items: center;
   margin-top: 6px;
 }
+.mural-file-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.mural-file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 4px 10px 4px 8px;
+  font-size: 11.5px;
+  font-family: var(--mono);
+}
+.mural-file-chip button {
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  line-height: 1;
+}
 .mural-poll-options {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+.mural-poll-opt-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.mural-poll-opt-row input {
+  flex: 1;
+}
+.mural-poll-opt-row button {
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 16px;
+  flex: none;
+}
+.mural-add-opt {
+  background: none;
+  border: 1px dashed var(--line);
+  border-radius: 7px;
+  padding: 7px 12px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  align-self: flex-start;
 }
 
 /* Recados */
@@ -2735,6 +2787,12 @@ body.presentation-mode #tool-fiscal .chart-box h3 {
   color: var(--ink-soft);
   font-size: 12px;
   flex: none;
+}
+.poll-opt-voters {
+  font-size: 11px;
+  color: var(--ink-soft);
+  padding: 0 12px;
+  line-height: 1.4;
 }
 .poll-footer {
   display: flex;

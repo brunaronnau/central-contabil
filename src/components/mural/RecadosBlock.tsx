@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import type { requireUser } from "@/lib/session";
-import { createRecado, deleteRecado, reactToRecado, togglePinRecado } from "@/app/actions/mural-recados";
+import { deleteRecado, reactToRecado, togglePinRecado } from "@/app/actions/mural-recados";
+import { NovoRecadoForm } from "./NovoRecadoForm";
+import { ConfirmForm } from "./ConfirmForm";
 
 function initials(name: string) {
   return name
@@ -19,6 +21,16 @@ function tempoRestante(expiresAt: Date): string {
   const horas = min / 60;
   if (horas < 48) return `expira em ${Math.round(horas)}h`;
   return `expira em ${Math.round(horas / 24)} dias`;
+}
+
+function fmtDataHora(d: Date): string {
+  return `${d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} ${d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
+function fmtFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
 const REACOES: { tipo: "LIKE" | "HEART" | "DISLIKE"; emoji: string }[] = [
@@ -42,51 +54,16 @@ export async function RecadosBlock({ me }: { me: Awaited<ReturnType<typeof requi
   });
 
   return (
-    <div className="mural-block mural-block-highlight">
+    <div className="mural-block">
       <div className="mural-block-head">
         <h2>Recados</h2>
         <span className="small-note">{recados.length} ativo(s)</span>
       </div>
 
-      <details>
-        <summary className="btn secondary" style={{ display: "inline-block", marginBottom: 16, cursor: "pointer" }}>
-          + Novo recado
-        </summary>
-        <form action={createRecado} className="mural-form open">
-          <div className="mural-form-row">
-            <label htmlFor="recado-text">Mensagem</label>
-            <textarea id="recado-text" name="text" required maxLength={2000} />
-          </div>
-          <div className="mural-form-grid">
-            <div className="mural-form-row">
-              <label htmlFor="recado-duration">Expira em</label>
-              <select id="recado-duration" name="duration" defaultValue={24}>
-                <option value={6}>6 horas</option>
-                <option value={24}>24 horas</option>
-                <option value={72}>3 dias</option>
-                <option value={168}>7 dias</option>
-                <option value={360}>15 dias</option>
-                <option value={720}>30 dias</option>
-              </select>
-            </div>
-            <div className="mural-form-row">
-              <label htmlFor="recado-files">Anexos (opcional, até 5MB cada, 7MB no total)</label>
-              <input id="recado-files" type="file" name="files" multiple />
-            </div>
-          </div>
-          <div className="mural-form-actions">
-            <label className="small-note" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <input type="checkbox" name="pinned" /> Fixar no topo
-            </label>
-            <button type="submit" className="btn">
-              Publicar
-            </button>
-          </div>
-        </form>
-      </details>
+      <NovoRecadoForm />
 
       {recados.length === 0 ? (
-        <div className="empty-state">Nenhum recado ativo no momento.</div>
+        <div className="empty-state">Nenhum recado no momento. Seja o primeiro a avisar a equipe!</div>
       ) : (
         <div className="recado-list">
           {recados.map((r) => {
@@ -109,7 +86,7 @@ export async function RecadosBlock({ me }: { me: Awaited<ReturnType<typeof requi
                 <div className="recado-body">
                   <div className="recado-top">
                     <span className="recado-author">{authorName}</span>
-                    <span className="recado-time">{r.createdAt.toLocaleDateString("pt-BR")}</span>
+                    <span className="recado-time">{fmtDataHora(r.createdAt)}</span>
                     {r.pinned && <span className="recado-pinned-tag">📌 fixado</span>}
                     <span className="recado-expiry">{tempoRestante(r.expiresAt)}</span>
                   </div>
@@ -118,7 +95,7 @@ export async function RecadosBlock({ me }: { me: Awaited<ReturnType<typeof requi
                     <div className="recado-attachments">
                       {r.anexos.map((a) => (
                         <a key={a.id} className="recado-attach-chip" href={`/api/mural/anexo/${a.id}`} download={a.nome}>
-                          📎 {a.nome}
+                          📎 {a.nome} <span style={{ opacity: 0.6 }}>({fmtFileSize(a.tamanho)})</span>
                         </a>
                       ))}
                     </div>
@@ -140,11 +117,11 @@ export async function RecadosBlock({ me }: { me: Awaited<ReturnType<typeof requi
                             {r.pinned ? "Desfixar" : "Fixar no topo"}
                           </button>
                         </form>
-                        <form action={deleteRecado.bind(null, r.id)}>
+                        <ConfirmForm action={deleteRecado.bind(null, r.id)} confirmMessage="Excluir este recado?">
                           <button type="submit" className="recado-del">
                             excluir
                           </button>
-                        </form>
+                        </ConfirmForm>
                       </div>
                     )}
                   </div>
