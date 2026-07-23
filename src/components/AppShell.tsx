@@ -15,7 +15,6 @@ const TOOL_NAV_ITEMS: NavItem[] = [
   { href: "/estoque", icon: "📊", label: "Calculadora de Estoque" },
   { href: "/entregas", icon: "📈", label: "Gestão de Entregas" },
   { href: "/tributaria", icon: "💵", label: "Análise Tributária" },
-  { href: "/agenda", icon: "📅", label: "Agenda da Controladoria" },
 ];
 
 const UTILITY_NAV_ITEMS: NavItem[] = [

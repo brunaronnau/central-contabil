@@ -16,8 +16,8 @@ Migração feita em fases. Todos os módulos do legado já foram portados — pr
 - [x] Calculadora de Estoque
 - [x] Gestão de Entregas
 - [x] Análise Tributária
-- [x] Agenda da Controladoria (protótipo com dados de exemplo — aguarda integração Microsoft 365)
 - [x] Recados & Metas (Mural) — com backend real (Postgres), diferente do legado que era só localStorage/IndexedDB
+- [ ] Agenda da Controladoria — protótipo removido (não tinha integração real, ficará de fora até haver um plano melhor)
 
 ## Rodando localmente (com Docker)
 
