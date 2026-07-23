@@ -27,11 +27,11 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-central}:${POSTGRES_PASSWORD:-central_dev_pw}@db:5432/${POSTGRES_DB:-central_contabil}?schema=public
       AUTH_SECRET: ${AUTH_SECRET}
-      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      AUTH_URL: ${AUTH_URL:-http://localhost:4010}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       NODE_ENV: production
     ports:
-      - "3000:3000"
+      - "4010:4010"
 
 volumes:
   postgres_data:

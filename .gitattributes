@@ -1,0 +1,4 @@
+# Scripts shell precisam manter quebra de linha LF mesmo em máquinas Windows
+# com core.autocrlf=true — CRLF no shebang quebra o "exec" no container
+# (erro clássico: "exec ./docker-entrypoint.sh: no such file or directory").
+*.sh text eol=lf

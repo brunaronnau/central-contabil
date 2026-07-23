@@ -28,7 +28,7 @@ Migração feita em fases. Todos os módulos do legado já foram portados — pr
    docker compose up --build
    ```
 
-3. Acesse http://localhost:3000 — a primeira pessoa a criar uma conta vira administradora automaticamente.
+3. Acesse http://localhost:4010 — a primeira pessoa a criar uma conta vira administradora automaticamente.
 
 Migrations do Prisma rodam sozinhas ao subir o container `app` (veja `docker-entrypoint.sh`).
 
