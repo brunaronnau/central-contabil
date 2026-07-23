@@ -75,8 +75,8 @@ model Recado {
   expiresAt DateTime
   createdAt DateTime @default(now())
 
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String?
+  author   User?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   anexos  RecadoAnexo[]
   reacoes RecadoReacao[]
@@ -109,8 +109,8 @@ model RecadoReacao {
 
   recadoId String
   recado   Recado @relation(fields: [recadoId], references: [id], onDelete: Cascade)
-  userId   String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String?
+  user     User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([recadoId, userId])
   @@map("recado_reacoes")
@@ -122,8 +122,8 @@ model Votacao {
   createdAt DateTime @default(now())
   encerraEm DateTime
 
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String?
+  author   User?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   opcoes VotacaoOpcao[]
   votos  VotacaoVoto[]
@@ -151,8 +151,8 @@ model VotacaoVoto {
   votacao   Votacao @relation(fields: [votacaoId], references: [id], onDelete: Cascade)
   opcaoId   String
   opcao     VotacaoOpcao @relation(fields: [opcaoId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([votacaoId, userId])
   @@map("votacao_votos")
@@ -180,8 +180,8 @@ model Meta {
   createdAt   DateTime   @default(now())
   completedAt DateTime?
 
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String?
+  author   User?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   notas MetaNota[]
 
@@ -196,8 +196,8 @@ model MetaNota {
 
   metaId   String
   meta     Meta   @relation(fields: [metaId], references: [id], onDelete: Cascade)
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String?
+  author   User?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   @@map("meta_notas")
 }

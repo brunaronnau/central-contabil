@@ -79,7 +79,7 @@ export async function MetasBlock({ me }: { me: Awaited<ReturnType<typeof require
                     <b>Prazo:</b> {m.endDate.toLocaleDateString("pt-BR")}
                   </span>
                   <span>
-                    <b>Responsável:</b> {m.author.name}
+                    <b>Responsável:</b> {m.author?.name ?? "Usuário removido"}
                   </span>
                 </div>
                 {m.reward && <div className="goal-reward">🎁 {m.reward}</div>}
@@ -89,7 +89,7 @@ export async function MetasBlock({ me }: { me: Awaited<ReturnType<typeof require
                     {m.notas.map((n) => (
                       <div key={n.id} className={`goal-note tipo-${n.tipo.toLowerCase()}`}>
                         <div className="gn-meta">
-                          {n.author.name} · {n.createdAt.toLocaleDateString("pt-BR")}
+                          {n.author?.name ?? "Usuário removido"} · {n.createdAt.toLocaleDateString("pt-BR")}
                         </div>
                         {n.text}
                       </div>

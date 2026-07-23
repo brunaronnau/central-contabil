@@ -94,20 +94,21 @@ export async function RecadosBlock({ me }: { me: Awaited<ReturnType<typeof requi
             const counts = { LIKE: 0, HEART: 0, DISLIKE: 0 };
             r.reacoes.forEach((rc) => counts[rc.tipo]++);
             const minhaReacao = r.reacoes.find((rc) => rc.userId === me.id)?.tipo;
+            const authorName = r.author?.name ?? "Usuário removido";
 
             return (
               <div key={r.id} className={`recado-card${r.pinned ? " pinned" : ""}`}>
                 <div className="avatar">
-                  {r.author.photo ? (
+                  {r.author?.photo ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={r.author.photo} alt="" />
                   ) : (
-                    initials(r.author.name)
+                    initials(authorName)
                   )}
                 </div>
                 <div className="recado-body">
                   <div className="recado-top">
-                    <span className="recado-author">{r.author.name}</span>
+                    <span className="recado-author">{authorName}</span>
                     <span className="recado-time">{r.createdAt.toLocaleDateString("pt-BR")}</span>
                     {r.pinned && <span className="recado-pinned-tag">📌 fixado</span>}
                     <span className="recado-expiry">{tempoRestante(r.expiresAt)}</span>

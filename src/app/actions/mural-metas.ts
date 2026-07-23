@@ -28,7 +28,7 @@ export async function createMeta(formData: FormData) {
   revalidatePath("/mural");
 }
 
-function podeGerenciarMeta(meta: { authorId: string }, user: { id: string; isAdmin: boolean }) {
+function podeGerenciarMeta(meta: { authorId: string | null }, user: { id: string; isAdmin: boolean }) {
   return user.isAdmin || meta.authorId === user.id;
 }
 

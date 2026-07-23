@@ -62,6 +62,7 @@ export async function VotacoesBlock({ me }: { me: Awaited<ReturnType<typeof requ
             const totalVotos = p.opcoes.reduce((s, o) => s + o.votos.length, 0);
             const meuVoto = p.opcoes.find((o) => o.votos.some((v) => v.userId === me.id))?.id;
             const canManage = me.isAdmin || p.authorId === me.id;
+            const authorName = p.author?.name ?? "Usuário removido";
 
             return (
               <div key={p.id} className={`poll-card${fechada ? " closed" : ""}`}>
@@ -70,7 +71,7 @@ export async function VotacoesBlock({ me }: { me: Awaited<ReturnType<typeof requ
                   <span className={`poll-status ${fechada ? "closed-tag" : "open"}`}>{fechada ? "Encerrada" : "Aberta"}</span>
                 </div>
                 <div className="poll-meta">
-                  {p.author.name} · {totalVotos} voto(s) · {fechada ? "encerrada em" : "encerra em"} {p.encerraEm.toLocaleDateString("pt-BR")}
+                  {authorName} · {totalVotos} voto(s) · {fechada ? "encerrada em" : "encerra em"} {p.encerraEm.toLocaleDateString("pt-BR")}
                 </div>
                 <div className="poll-options">
                   {p.opcoes.map((op) => {
@@ -101,9 +102,9 @@ export async function VotacoesBlock({ me }: { me: Awaited<ReturnType<typeof requ
                     <ExportPollButton
                       poll={{
                         titulo: p.titulo,
-                        authorName: p.author.name,
+                        authorName,
                         fechada,
-                        opcoes: p.opcoes.map((o) => ({ texto: o.texto, votantes: o.votos.map((v) => v.user.name) })),
+                        opcoes: p.opcoes.map((o) => ({ texto: o.texto, votantes: o.votos.map((v) => v.user?.name ?? "Usuário removido") })),
                       }}
                     />
                   </div>
