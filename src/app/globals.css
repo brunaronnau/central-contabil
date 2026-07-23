@@ -205,10 +205,13 @@ body {
     box-shadow: 0 0 0 0 rgba(245, 180, 0, 0);
   }
 }
+.notif-bell-wrap {
+  position: relative;
+}
 .notif-panel {
-  position: fixed;
-  left: 20px;
-  bottom: 132px;
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
   width: 340px;
   max-height: 420px;
   background: var(--paper-alt);
@@ -234,6 +237,11 @@ body {
   font-family: var(--serif);
   font-weight: 600;
   font-size: 14px;
+}
+.notif-panel-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 .notif-panel-head button {
   background: none;
@@ -297,6 +305,50 @@ body {
   text-align: center;
   color: var(--ink-soft);
   font-size: 12.5px;
+}
+.notif-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 21, 28, 0.55);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.notif-modal {
+  background: var(--paper-alt);
+  color: var(--ink);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  width: 100%;
+  max-width: 420px;
+  padding: 22px 24px;
+}
+.notif-modal-title {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.notif-modal-sub {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+.notif-modal-date {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 14px;
+}
+.notif-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
 }
 .main-area {
   flex: 1;

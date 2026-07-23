@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  limparHistoricoNotificacoes,
   listNotificacoes,
   marcarNotificacoesVistas,
   savePushSubscription,
@@ -33,6 +34,7 @@ export function NotifBell() {
   const [lastSeenAt, setLastSeenAt] = useState(0);
   const [aberto, setAberto] = useState(false);
   const [pushStatus, setPushStatus] = useState<"indisponivel" | "pendente" | "ativo" | "negado">("pendente");
+  const [selecionada, setSelecionada] = useState<NotificacaoItem | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const carregar = useCallback(async () => {
@@ -105,12 +107,24 @@ export function NotifBell() {
   }
 
   function abrirItem(item: NotificacaoItem) {
+    setSelecionada(item);
+  }
+
+  function irParaItem(item: NotificacaoItem) {
+    setSelecionada(null);
     setAberto(false);
     if (item.href) router.push(item.href);
   }
 
+  async function limparHistorico() {
+    if (!confirm("Limpar todo o histórico de notificações? Elas somem só da sua lista, os outros usuários continuam vendo normalmente.")) return;
+    await limparHistoricoNotificacoes();
+    setItens([]);
+    setTemNaoLida(false);
+  }
+
   return (
-    <div ref={wrapRef}>
+    <div className="notif-bell-wrap" ref={wrapRef}>
       <button type="button" className="notif-bell" onClick={toggle}>
         <span className="nb-icon">🔔</span>
         <span className="nb-label">Notificações</span>
@@ -121,12 +135,19 @@ export function NotifBell() {
         <div className="notif-panel">
           <div className="notif-panel-head">
             <span>Notificações</span>
-            {pushStatus === "pendente" && (
-              <button type="button" onClick={ativarPush}>
-                ativar no computador
-              </button>
-            )}
-            {pushStatus === "ativo" && <span className="notif-push-ok">push ativo</span>}
+            <div className="notif-panel-head-actions">
+              {pushStatus === "pendente" && (
+                <button type="button" onClick={ativarPush}>
+                  ativar no computador
+                </button>
+              )}
+              {pushStatus === "ativo" && <span className="notif-push-ok">push ativo</span>}
+              {itens.length > 0 && (
+                <button type="button" onClick={limparHistorico}>
+                  limpar histórico
+                </button>
+              )}
+            </div>
           </div>
           <div className="notif-panel-list">
             {itens.length === 0 ? (
@@ -144,6 +165,30 @@ export function NotifBell() {
                 </div>
               ))
             )}
+          </div>
+        </div>
+      )}
+
+      {selecionada && (
+        <div className="notif-modal-overlay" onClick={() => setSelecionada(null)}>
+          <div className="notif-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="notif-modal-title">
+              {ICONES[selecionada.kind] ?? "🔔"} {selecionada.titulo}
+            </div>
+            {selecionada.sub && <div className="notif-modal-sub">{selecionada.sub}</div>}
+            <div className="notif-modal-date">
+              {new Date(selecionada.createdAt).toLocaleString("pt-BR", { dateStyle: "long", timeStyle: "short" })}
+            </div>
+            <div className="notif-modal-actions">
+              <button type="button" className="btn secondary" onClick={() => setSelecionada(null)}>
+                Fechar
+              </button>
+              {selecionada.href && (
+                <button type="button" className="btn" onClick={() => irParaItem(selecionada)}>
+                  Abrir
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

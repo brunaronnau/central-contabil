@@ -16,10 +16,11 @@ export type NotificacaoItem = {
 
 export async function listNotificacoes(): Promise<{ itens: NotificacaoItem[]; temNaoLida: boolean; lastSeenAt: number }> {
   const me = await requireUser();
-  const user = await prisma.user.findUnique({ where: { id: me.id }, select: { notifLastSeenAt: true } });
+  const user = await prisma.user.findUnique({ where: { id: me.id }, select: { notifLastSeenAt: true, notifClearedAt: true } });
   const lastSeen = user?.notifLastSeenAt ?? new Date(0);
 
   const notificacoes = await prisma.notificacao.findMany({
+    where: user?.notifClearedAt ? { createdAt: { gt: user.notifClearedAt } } : undefined,
     orderBy: { createdAt: "desc" },
     take: LIMITE_PAINEL,
   });
@@ -41,6 +42,11 @@ export async function listNotificacoes(): Promise<{ itens: NotificacaoItem[]; te
 export async function marcarNotificacoesVistas() {
   const me = await requireUser();
   await prisma.user.update({ where: { id: me.id }, data: { notifLastSeenAt: new Date() } });
+}
+
+export async function limparHistoricoNotificacoes() {
+  const me = await requireUser();
+  await prisma.user.update({ where: { id: me.id }, data: { notifClearedAt: new Date(), notifLastSeenAt: new Date() } });
 }
 
 export async function savePushSubscription(sub: { endpoint: string; keys: { p256dh: string; auth: string } }) {
