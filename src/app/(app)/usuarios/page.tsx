@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { deleteUser, toggleAdmin, updateMyName } from "@/app/actions/users";
 import { ProfilePhotoEditor } from "@/components/ProfilePhotoEditor";
+import { DeleteUserButton } from "@/components/DeleteUserButton";
 
 function initials(name: string) {
   return name
@@ -112,13 +113,7 @@ export default async function UsuariosPage() {
                           </button>
                         </form>
                       )}
-                      {canDelete && (
-                        <form action={deleteUser.bind(null, u.id)}>
-                          <button type="submit" className="user-del-btn">
-                            {isMe ? "Remover minha conta" : "Remover acesso"}
-                          </button>
-                        </form>
-                      )}
+                      {canDelete && <DeleteUserButton action={deleteUser.bind(null, u.id)} isMe={isMe} />}
                     </div>
                   </td>
                 </tr>
