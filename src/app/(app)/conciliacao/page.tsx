@@ -307,26 +307,6 @@ export default function ConciliacaoPage() {
           <div className="step-head">
             <span className="step-num">01</span>
             <div>
-              <div className="step-title">Censurar dados sensíveis</div>
-              <p className="step-sub">Antes de anexar, tarje ou remova informações sensíveis do cliente e da Navecon nos arquivos originais.</p>
-            </div>
-          </div>
-          <div className="map-card" style={{ maxWidth: 640 }}>
-            <p style={{ margin: "0 0 14px", fontSize: 13.5, color: "var(--ink-soft)", lineHeight: 1.5 }}>
-              Revise o extrato bancário e o relatório de contas antes de subir aqui: apague ou tarje CNPJ, número de
-              conta/agência completos, saldos de outras contas e qualquer dado de terceiros que não seja necessário
-              para a conciliação. Mantenha visíveis apenas as colunas essenciais — data, descrição/histórico e valor.
-            </p>
-            <a href="https://www.ilovepdf.com/pt/editar-pdf" target="_blank" rel="noopener noreferrer" className="btn secondary" style={{ display: "inline-block", textDecoration: "none" }}>
-              Abrir editor de PDF (iLovePDF) ↗
-            </a>
-          </div>
-        </section>
-
-        <section className="step">
-          <div className="step-head">
-            <span className="step-num">02</span>
-            <div>
               <div className="step-title">Anexar arquivos</div>
               <p className="step-sub">Formatos aceitos: .xlsx, .xls, .csv, .pdf</p>
             </div>
@@ -417,7 +397,7 @@ export default function ConciliacaoPage() {
 
         <section className={`step${ready ? "" : " locked"}`}>
           <div className="step-head">
-            <span className="step-num">03</span>
+            <span className="step-num">02</span>
             <div>
               <div className="step-title">Confirmar colunas</div>
               <p className="step-sub">A IA analisa o cabeçalho e a amostra do arquivo e já sugere o mapeamento — confira antes de rodar a conciliação.</p>
@@ -551,7 +531,7 @@ export default function ConciliacaoPage() {
 
         <section className={`step${result ? "" : " locked"}`}>
           <div className="step-head">
-            <span className="step-num">04</span>
+            <span className="step-num">03</span>
             <div>
               <div className="step-title">Resultado da conciliação</div>
               <p className="step-sub">Confira os casos automáticos, refine as sugestões com IA e exporte.</p>
