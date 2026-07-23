@@ -5,7 +5,7 @@ import {
   type EntregaRow,
   type EntregasStats,
   type GraficosMensal,
-  type LastUpload,
+  type LastSync,
   type MetricasGeral,
   type PeriodResult,
   computeGraficosMensal,
@@ -17,13 +17,12 @@ import {
   fmt,
   fmtDateBR,
   heatmapLevel,
-  loadLastUpload,
-  parseEntregasRows,
+  loadLastSync,
   pct,
-  readEntregasFile,
-  saveLastUpload,
+  saveLastSync,
 } from "@/lib/entregas";
 import { drawGroupedBarChart, drawLineChart } from "@/lib/entregas-charts";
+import { syncEntregasFromAcessorias } from "@/app/actions/entregas";
 
 function PeriodoSelects({
   competencias,
@@ -100,12 +99,12 @@ function BucketTable({ rows, nomeLabel }: { rows: { nome: string; entregues: num
   );
 }
 
-export function EntregasClient({ userName }: { userName: string }) {
+export function EntregasClient() {
   const [raw, setRaw] = useState<EntregaRow[] | null>(null);
   const [stats, setStats] = useState<EntregasStats | null>(null);
-  const [currentFile, setCurrentFile] = useState<File | null>(null);
-  const [processStatus, setProcessStatus] = useState("");
-  const [lastUpload, setLastUpload] = useState<LastUpload | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncError, setSyncError] = useState("");
+  const [lastSync, setLastSync] = useState<LastSync | null>(null);
   const [apresentacao, setApresentacao] = useState(false);
 
   const [periodoInicio, setPeriodoInicio] = useState("");
@@ -131,14 +130,15 @@ export function EntregasClient({ userName }: { userName: string }) {
   const [graficos, setGraficos] = useState<GraficosMensal | null>(null);
   const [graficosStatus, setGraficosStatus] = useState("");
 
-  const dzInputRef = useRef<HTMLInputElement>(null);
   const chartTendenciaRef = useRef<HTMLCanvasElement>(null);
   const chartComposicaoRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     // localStorage não existe durante o SSR — só dá pra ler depois de montar no cliente.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLastUpload(loadLastUpload());
+    setLastSync(loadLastSync());
+    // Sincroniza automaticamente ao abrir a página — não deve exigir nenhuma ação manual.
+    runSync();
   }, []);
 
   useEffect(() => {
@@ -152,21 +152,16 @@ export function EntregasClient({ userName }: { userName: string }) {
 
   const heatmap = useMemo(() => (stats ? computeHeatmap(stats) : null), [stats]);
 
-  function handleFile(file: File) {
-    setCurrentFile(file);
-  }
-
-  async function handleProcess() {
-    if (!currentFile) return;
-    setProcessStatus("Lendo arquivo...");
+  async function runSync() {
+    setSyncing(true);
+    setSyncError("");
     try {
-      const data = await readEntregasFile(currentFile);
-      const { rows, error } = parseEntregasRows(data);
-      if (!rows) {
-        setProcessStatus(error ?? "Não foi possível ler o arquivo.");
+      const result = await syncEntregasFromAcessorias();
+      if (!result.rows) {
+        setSyncError(result.error ?? "Não foi possível sincronizar com o Acessórias.");
         return;
       }
-      setProcessStatus(`${fmt(rows.length)} linhas processadas.`);
+      const rows = result.rows;
       setRaw(rows);
       const s = computeStats(rows);
       setStats(s);
@@ -200,23 +195,14 @@ export function EntregasClient({ userName }: { userName: string }) {
 
       if (s.diasComEntrega.length > 0) setDiaSelecionado(s.diasComEntrega[0]);
 
-      const info: LastUpload = { nome: userName, arquivo: currentFile.name, timestamp: Date.now() };
-      saveLastUpload(info);
-      setLastUpload(info);
+      const info: LastSync = { timestamp: Date.now(), totalEmpresas: result.totalEmpresas ?? 0, totalObrigacoes: rows.length };
+      saveLastSync(info);
+      setLastSync(info);
     } catch (err) {
-      setProcessStatus(err instanceof Error ? `Erro ao processar: ${err.message}` : "Não foi possível ler o arquivo. Verifique o formato.");
+      setSyncError(err instanceof Error ? err.message : "Não foi possível sincronizar com o Acessórias.");
+    } finally {
+      setSyncing(false);
     }
-  }
-
-  function handleReset() {
-    setRaw(null);
-    setStats(null);
-    setCurrentFile(null);
-    setProcessStatus("");
-    setPeriodoResult(null);
-    setPessoaResult(null);
-    setMetricas(null);
-    setGraficos(null);
   }
 
   function aplicarPeriodo() {
@@ -310,11 +296,7 @@ export function EntregasClient({ userName }: { userName: string }) {
       <div className="tool-header">
         <div className="wrap">
           <h1>Dashboard de Gestão de Entregas</h1>
-          <p>
-            Vá até o Acessórias e coloque o filtro de todas as entregas, pendências e justificadas, com o filtro de
-            competência do primeiro mês do ano até agora, ocultando as tarefas agendadas. Em seguida, gere o arquivo
-            na opção &quot;Excel completo&quot; e anexe abaixo.
-          </p>
+          <p>Dados sincronizados automaticamente com o Acessórias — sem necessidade de anexar relatório.</p>
         </div>
       </div>
 
@@ -323,53 +305,25 @@ export function EntregasClient({ userName }: { userName: string }) {
           <div className="step-head">
             <span className="step-num">01</span>
             <div>
-              <div className="step-title">Anexar relatório</div>
-              <p className="step-sub">Formatos aceitos: .csv, .xlsx, .xls — gere pelo Acessórias na opção &quot;Excel completo&quot;.</p>
+              <div className="step-title">Sincronização com o Acessórias</div>
+              <p className="step-sub">Puxa direto da API do Acessórias as entregas/obrigações dos departamentos Célula Contábil e Lançamentos, do ano até hoje.</p>
             </div>
           </div>
-          {lastUpload && (
+          {lastSync && (
             <div style={{ marginBottom: 16 }}>
-              <span className="stamp ok">Última atualização</span>{" "}
+              <span className="stamp ok">Última sincronização</span>{" "}
               <span className="small-note">
-                anexado por <b>{lastUpload.nome}</b> em {new Date(lastUpload.timestamp).toLocaleDateString("pt-BR")} às{" "}
-                {new Date(lastUpload.timestamp).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · arquivo:{" "}
-                <span style={{ fontFamily: "var(--mono)" }}>{lastUpload.arquivo}</span>
+                {new Date(lastSync.timestamp).toLocaleDateString("pt-BR")} às{" "}
+                {new Date(lastSync.timestamp).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} ·{" "}
+                {fmt(lastSync.totalEmpresas)} empresas · {fmt(lastSync.totalObrigacoes)} obrigações
               </span>
             </div>
           )}
-          <div
-            className="dropzone"
-            onClick={() => dzInputRef.current?.click()}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => {
-              e.preventDefault();
-              if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-            }}
-          >
-            <div className="dz-icon">▤</div>
-            <h3>Relatório de gestão de entregas</h3>
-            <p className="hint">Clique para escolher o arquivo ou arraste aqui.</p>
-            <input ref={dzInputRef} type="file" accept=".csv,.xlsx,.xls" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-          </div>
-          {currentFile && (
-            <div className="file-chip">
-              <span className="name">{currentFile.name}</span>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCurrentFile(null);
-                }}
-              >
-                ✕
-              </button>
-            </div>
-          )}
           <div className="btn-row">
-            <button className="btn" disabled={!currentFile} onClick={handleProcess}>
-              Processar relatório
+            <button className="btn" disabled={syncing} onClick={runSync}>
+              {syncing ? "Sincronizando..." : "Sincronizar agora"}
             </button>
-            <span className="small-note">{processStatus}</span>
+            {syncError && <span className="small-note" style={{ color: "var(--danger)" }}>{syncError}</span>}
           </div>
         </section>
 
@@ -718,8 +672,8 @@ export function EntregasClient({ userName }: { userName: string }) {
         </section>
 
         <div className="footer-actions no-print">
-          <button className="btn secondary" onClick={handleReset}>
-            Novo arquivo
+          <button className="btn secondary" disabled={syncing} onClick={runSync}>
+            {syncing ? "Sincronizando..." : "Sincronizar novamente"}
           </button>
           <div style={{ display: "flex", gap: 12 }}>
             <button className="btn secondary btn-modo-apresentacao" onClick={toggleApresentacao}>

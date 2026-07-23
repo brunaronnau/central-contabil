@@ -1,6 +1,3 @@
-import * as XLSX from "xlsx";
-import Papa from "papaparse";
-
 export type EntregaClasse = "entregue" | "pendente" | "atrasada" | "justificada" | "dispensada" | "outro";
 
 export type EntregaRow = {
@@ -56,45 +53,7 @@ export function pct(n: number): string {
   return n.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + "%";
 }
 
-/* ==================== Parsing ==================== */
-
-function norm(s: string | undefined | null): string {
-  return (s ?? "")
-    .toString()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
-const CANON: Record<string, string[]> = {
-  obrigacao: ["obrigacao / tarefa", "obrigacao/tarefa", "obrigacao", "tarefa"],
-  empresa: ["empresa"],
-  empid: ["empid", "emp id"],
-  cnpj: ["cnpj"],
-  cidade: ["cidade"],
-  estado: ["estado", "uf"],
-  prazolegal: ["prazo legal"],
-  prazotecnico: ["prazo tecnico"],
-  dataentrega: ["data da entrega", "data entrega"],
-  status: ["status"],
-  departamento: ["departamento"],
-  respprazo: ["responsavel prazo"],
-  respentrega: ["responsavel entrega"],
-  competencia: ["competencia"],
-  protocolo: ["protocolo"],
-};
-
-export function mapHeaders(headers: string[]): Record<string, string> {
-  const map: Record<string, string> = {};
-  headers.forEach((h) => {
-    const n = norm(h);
-    for (const key of Object.keys(CANON)) {
-      if (CANON[key].includes(n)) map[key] = h;
-    }
-  });
-  return map;
-}
+/* ==================== Classificação ==================== */
 
 export function classify(status: string | undefined | null): EntregaClasse {
   const s = (status ?? "").trim();
@@ -105,59 +64,6 @@ export function classify(status: string | undefined | null): EntregaClasse {
   if (s === "Atraso justificado" || s === "Pend. justificada") return "justificada";
   if (s === "Ent. PzTéc." || s === "Ent. antecipada" || s === "Ent. atrasada" || s === "Ent. justificada") return "entregue";
   return "outro";
-}
-
-export function readEntregasFile(file: File): Promise<Record<string, string>[]> {
-  const name = file.name.toLowerCase();
-  if (name.endsWith(".csv")) {
-    return new Promise((resolve, reject) => {
-      Papa.parse<Record<string, string>>(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (res) => resolve(res.data),
-        error: (err: Error) => reject(err),
-      });
-    });
-  }
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const wb = XLSX.read(e.target!.result as ArrayBuffer, { type: "array" });
-        const sheet = wb.Sheets[wb.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(sheet, { defval: "" }) as Record<string, string>[];
-        resolve(data);
-      } catch (err) {
-        reject(err instanceof Error ? err : new Error(String(err)));
-      }
-    };
-    reader.onerror = () => reject(new Error("falha ao ler o arquivo"));
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-export function parseEntregasRows(data: Record<string, string>[]): { rows: EntregaRow[] | null; error?: string } {
-  if (!data || data.length === 0) {
-    return { rows: null, error: "Arquivo vazio ou ilegível." };
-  }
-  const map = mapHeaders(Object.keys(data[0]));
-  if (!map.status) {
-    return { rows: null, error: 'Não encontrei a coluna "Status" — confirme se é o relatório de Gestão de Entregas (S3D).' };
-  }
-  const rows: EntregaRow[] = data.map((row) => ({
-    obrigacao: row[map.obrigacao] || "",
-    empresa: row[map.empresa] || "",
-    empid: row[map.empid] || "",
-    departamento: row[map.departamento] || "(sem departamento)",
-    respprazo: row[map.respprazo] || "(sem responsável)",
-    respentrega: row[map.respentrega] || "",
-    dataentrega: row[map.dataentrega] || "",
-    prazolegal: row[map.prazolegal] || "",
-    competencia: row[map.competencia] || "",
-    status: row[map.status] || "",
-    classe: classify(row[map.status] || ""),
-  }));
-  return { rows };
 }
 
 /* ==================== Datas / competência ==================== */
@@ -476,24 +382,24 @@ export function computeGraficosMensal(stats: EntregasStats, startComp: string, e
   return { meses, tendenciaMensal };
 }
 
-/* ==================== Último upload (localStorage) ==================== */
+/* ==================== Última sincronização (localStorage) ==================== */
 
-const LAST_UPLOAD_KEY = "nvc_entregas_last_upload";
+const LAST_SYNC_KEY = "nvc_entregas_last_sync";
 
-export type LastUpload = { nome: string; arquivo: string; timestamp: number };
+export type LastSync = { timestamp: number; totalEmpresas: number; totalObrigacoes: number };
 
-export function saveLastUpload(info: LastUpload) {
+export function saveLastSync(info: LastSync) {
   try {
-    localStorage.setItem(LAST_UPLOAD_KEY, JSON.stringify(info));
+    localStorage.setItem(LAST_SYNC_KEY, JSON.stringify(info));
   } catch {
     // localStorage indisponível — não é crítico
   }
 }
 
-export function loadLastUpload(): LastUpload | null {
+export function loadLastSync(): LastSync | null {
   try {
-    const raw = localStorage.getItem(LAST_UPLOAD_KEY);
-    return raw ? (JSON.parse(raw) as LastUpload) : null;
+    const raw = localStorage.getItem(LAST_SYNC_KEY);
+    return raw ? (JSON.parse(raw) as LastSync) : null;
   } catch {
     return null;
   }

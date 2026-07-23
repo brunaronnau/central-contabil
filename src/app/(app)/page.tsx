@@ -17,7 +17,7 @@ const TOOLS = [
     href: "/entregas",
     icon: "📈",
     title: "Gestão de Entregas",
-    description: "Acompanhamento de entregas conforme relatório extraído do Acessórias.",
+    description: "Acompanhamento de entregas sincronizado automaticamente com o Acessórias.",
   },
   {
     href: "/tributaria",
