@@ -1679,6 +1679,12 @@ body.presentation-mode #ent-btnSairApresentacaoFloat {
   font-weight: 600;
   margin: 0 0 14px;
 }
+#tool-fiscal .card .desc {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
 #tool-fiscal .assumptions {
   margin: 0;
   padding-left: 18px;
@@ -1864,32 +1870,6 @@ body.presentation-mode #ent-btnSairApresentacaoFloat {
   margin-left: 8px;
 }
 
-#tool-fiscal .completude-badge {
-  margin-bottom: 18px;
-}
-#tool-fiscal .completude-linha {
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-size: 12.5px;
-  border: 1px solid var(--line);
-  background: #fff;
-}
-#tool-fiscal .completude-linha.completude-good {
-  border-color: #beead3;
-  background: var(--success-bg);
-  color: var(--success);
-}
-#tool-fiscal .completude-linha.completude-gold {
-  border-color: #efdfae;
-  background: var(--warn-bg);
-  color: var(--warn);
-}
-#tool-fiscal .completude-linha.completude-danger {
-  border-color: #f0c6c6;
-  background: var(--danger-bg);
-  color: var(--danger);
-}
-
 #tool-fiscal .chart-box {
   background: var(--paper-alt);
   border: 1px solid var(--line);
@@ -1926,6 +1906,15 @@ body.presentation-mode #ent-btnSairApresentacaoFloat {
   color: #aab2bd;
   font-size: 12.5px;
 }
+#tool-fiscal .dashboard-header .btn-modo-apresentacao {
+  background: #fff;
+  color: var(--ink);
+  border-color: #fff;
+}
+#tool-fiscal .dashboard-header .btn-modo-apresentacao:hover {
+  background: #fff;
+  opacity: 0.85;
+}
 
 #tool-fiscal .hero-economia {
   background: linear-gradient(120deg, var(--success) 0%, #1b5c48 100%);
@@ -1955,7 +1944,6 @@ body.presentation-mode #ent-btnSairApresentacaoFloat {
 
 /* ---------- Análise Tributária: modo apresentação ---------- */
 body.presentation-mode #tool-fiscal .at-tabs,
-body.presentation-mode #tool-fiscal .completude-badge,
 body.presentation-mode .sidebar,
 body.presentation-mode .tool-header,
 body.presentation-mode .back-link {

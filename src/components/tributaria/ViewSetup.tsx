@@ -10,10 +10,14 @@ export function ViewSetup({
   grupo,
   onUpdateGrupo,
   onIrPara,
+  apresentacao,
+  onToggleApresentacao,
 }: {
   grupo: Grupo;
   onUpdateGrupo: (mutator: (g: Grupo) => Grupo) => void;
   onIrPara: (v: ViewKey) => void;
+  apresentacao: boolean;
+  onToggleApresentacao: () => void;
 }) {
   const [abertas, setAbertas] = useState<Record<string, boolean>>({});
 
@@ -34,6 +38,12 @@ export function ViewSetup({
 
   return (
     <section className="at-view active">
+      <div className="btn-row no-print" style={{ justifyContent: "flex-end", marginBottom: 4 }}>
+        <button className="btn secondary btn-modo-apresentacao" onClick={onToggleApresentacao}>
+          {apresentacao ? "✕ Sair do Modo Apresentação" : "✶ Modo Apresentação"}
+        </button>
+      </div>
+
       <div className="card">
         <h2>Dados do Grupo</h2>
         <div className="field-row">

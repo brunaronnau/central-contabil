@@ -116,14 +116,38 @@ export function TributariaClient() {
           </span>
         </nav>
 
-        {view === "grupos" && <ViewGrupos grupos={grupos} onCriar={criarGrupo} onSelecionar={selecionarGrupo} onExcluir={excluirGrupo} onIrPara={irPara} />}
+        {view === "grupos" && (
+          <ViewGrupos
+            grupos={grupos}
+            onCriar={criarGrupo}
+            onSelecionar={selecionarGrupo}
+            onExcluir={excluirGrupo}
+            onIrPara={irPara}
+            apresentacao={apresentacao}
+            onToggleApresentacao={toggleApresentacao}
+          />
+        )}
 
         {view === "setup" && grupoAtivo && (
-          <ViewSetup grupo={grupoAtivo} onUpdateGrupo={(mutator) => atualizarGrupo(grupoAtivo.id, mutator)} onIrPara={irPara} />
+          <ViewSetup
+            grupo={grupoAtivo}
+            onUpdateGrupo={(mutator) => atualizarGrupo(grupoAtivo.id, mutator)}
+            onIrPara={irPara}
+            apresentacao={apresentacao}
+            onToggleApresentacao={toggleApresentacao}
+          />
         )}
 
         {view === "dados" && grupoAtivo && (
-          <ViewDados grupo={grupoAtivo} ano={ano} onAno={mudarAno} onUpdateGrupo={(mutator) => atualizarGrupo(grupoAtivo.id, mutator)} onIrPara={irPara} />
+          <ViewDados
+            grupo={grupoAtivo}
+            ano={ano}
+            onAno={mudarAno}
+            onUpdateGrupo={(mutator) => atualizarGrupo(grupoAtivo.id, mutator)}
+            onIrPara={irPara}
+            apresentacao={apresentacao}
+            onToggleApresentacao={toggleApresentacao}
+          />
         )}
 
         {view === "relatorio" && grupoAtivo && (

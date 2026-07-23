@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { type Grupo, MESES, anosComDados, fmtBRL, fmtPct, getAnos, processarAno } from "@/lib/tributaria";
+import { CBS_RATE, type Grupo, MESES, anosComDados, fmtBRL, fmtPct, getAnos, processarAno } from "@/lib/tributaria";
 import type { ViewKey } from "./TributariaClient";
 
 const CATEGORIAS: { key: "irpj" | "csll" | "pis" | "cofins" | "icmsNormal" | "icmsTTD" | "iss" | "fundos" | "ipi" | "inss" | "simples"; label: string }[] = [
@@ -162,28 +162,34 @@ export function ViewRelatorio({
 
       <div className="card">
         <h2>Comparativo Pós-Reforma — Carga Atual vs. Carga com CBS</h2>
+        <p className="desc">
+          Aplica o débito de CBS projetado ({fmtPct(CBS_RATE)}) sobre cada cenário exibido, para dimensionar o impacto da transição em cada composição
+          tributária simulada.
+        </p>
         <div style={{ overflowX: "auto" }}>
           <table className="report">
             <thead>
               <tr>
                 <th>Cenário</th>
                 <th>Carga Atual</th>
-                <th>CBS Projetado (Transição)</th>
+                <th>CBS Projetado</th>
+                <th>Carga Total (Transição)</th>
                 <th>Variação</th>
               </tr>
             </thead>
             <tbody>
               {cenarios.detalhados.map((d) => {
-                const variacao = d.cbsTotal - d.total;
+                const pisCofinsTotal = d.pis.reduce((a, v) => a + v, 0) + d.cofins.reduce((a, v) => a + v, 0);
+                const cargaTotalTransicao = d.cbsTotal;
+                const cbsProjetado = cargaTotalTransicao - (d.total - pisCofinsTotal);
+                const variacao = d.total > 0 ? (cargaTotalTransicao - d.total) / d.total : 0;
                 return (
                   <tr key={d.chave}>
                     <td>{d.label}</td>
                     <td>{fmtBRL(d.total)}</td>
-                    <td>{fmtBRL(d.cbsTotal)}</td>
-                    <td style={{ color: variacao > 0 ? "var(--danger)" : "var(--success)" }}>
-                      {variacao > 0 ? "+" : ""}
-                      {fmtBRL(variacao)}
-                    </td>
+                    <td>{fmtBRL(cbsProjetado)}</td>
+                    <td>{fmtBRL(cargaTotalTransicao)}</td>
+                    <td>{fmtPct(variacao)}</td>
                   </tr>
                 );
               })}
@@ -191,8 +197,10 @@ export function ViewRelatorio({
           </table>
         </div>
         <p className="small-note" style={{ marginTop: 10 }}>
-          Projeção simplificada de transição: PIS e COFINS substituídos por CBS a {(0.0945 * 100).toFixed(2)}% sobre o faturamento. Não considera IBS
-          estadual/municipal nem regras de crédito da reforma — validar periodicamente.
+          Carga Total (Transição) = (carga atual do cenário − PIS − COFINS) + (
+          {cenarios.temSimples ? "faturamento do grupo menos faturamento intercompany" : "faturamento total do grupo"} × {fmtPct(CBS_RATE)}). Como a carga
+          tributária e a base de PIS/COFINS variam por cenário, o CBS Projetado e a variação percentual também variam entre eles. Alíquota de referência para
+          o período de transição — validar periodicamente.
         </p>
       </div>
 
@@ -226,7 +234,10 @@ export function ViewRelatorio({
         <h2>Detalhamento Mensal por Cenário</h2>
         {cenarios.detalhados.map((d) => (
           <div key={d.chave} style={{ marginBottom: 24 }}>
-            <h4 style={{ fontFamily: "var(--serif)", fontSize: 14, marginBottom: 10 }}>{d.label}</h4>
+            <h4 style={{ fontFamily: "var(--serif)", fontSize: 14, marginBottom: 10 }}>
+              {d.label}
+              {d.chave === cenarios.melhorChave && <span className="badge-best">Recomendado</span>}
+            </h4>
             <div style={{ overflowX: "auto" }}>
               <table className="report">
                 <thead>

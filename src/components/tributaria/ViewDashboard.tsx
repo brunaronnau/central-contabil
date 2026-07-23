@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { type Grupo, anosComDados, calcularCompletudeDados, fmtBRL, fmtPct, getAnos, processarAno } from "@/lib/tributaria";
+import { type Grupo, anosComDados, fmtBRL, fmtPct, getAnos, processarAno } from "@/lib/tributaria";
 import { drawBarChart } from "@/lib/tributaria-charts";
 import { drawGroupedBarChart, drawLineChart } from "@/lib/entregas-charts";
 import type { ViewKey } from "./TributariaClient";
@@ -29,7 +29,6 @@ export function ViewDashboard({
   const chartAnualRef = useRef<HTMLCanvasElement>(null);
 
   const { cenarios } = useMemo(() => processarAno(grupo, ano), [grupo, ano]);
-  const completude = useMemo(() => calcularCompletudeDados(grupo, ano), [grupo, ano]);
 
   const anosParaComparar = useMemo(() => {
     const anos = new Set(anosComDados(grupo));
@@ -108,8 +107,6 @@ export function ViewDashboard({
   }
 
   const melhorCenario = cenarios.cenarios.find((c) => c.chave === cenarios.melhorChave)!;
-  const completudeClasse = completude.percReceita >= 0.999 ? "good" : completude.percReceita >= 0.75 ? "gold" : "danger";
-  const incompletas = completude.detalhes.filter((d) => d.mesesComReceita < 12);
 
   return (
     <section className="at-view active">
@@ -166,19 +163,10 @@ export function ViewDashboard({
       </div>
 
       <div className="hero-economia">
-        <div className="hero-label">Economia potencial estimada</div>
+        <div className="hero-label">Economia tributária estimada</div>
         <div className="hero-value">{fmtBRL(cenarios.economia)}</div>
         <div className="hero-sub">
           Optando por <b>{melhorCenario.label}</b> em vez do cenário mais custoso — {fmtPct(cenarios.economiaPerc)} de redução na carga tributária
-        </div>
-      </div>
-
-      <div className="completude-badge no-print">
-        <div className={`completude-linha completude-${completudeClasse}`}>
-          <b>Completude dos dados ({ano}):</b> {fmtPct(completude.percReceita)} dos meses com faturamento preenchido em todas as empresas
-          {incompletas.length > 0
-            ? " — verificar antes da reunião: " + incompletas.map((d) => `${d.nome} (${d.mesesComReceita}/12 meses)`).join(" · ")
-            : " — nenhum mês em branco detectado"}
         </div>
       </div>
 
