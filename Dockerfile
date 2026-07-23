@@ -12,6 +12,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npx prisma generate
 RUN npm run build
+RUN npm prune --omit=dev
 
 FROM base AS runner
 WORKDIR /app
@@ -26,9 +27,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 COPY docker-entrypoint.sh ./
 RUN sed -i 's/\r$//' docker-entrypoint.sh && chmod +x docker-entrypoint.sh && chown nextjs:nodejs docker-entrypoint.sh
