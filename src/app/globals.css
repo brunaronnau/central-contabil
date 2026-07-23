@@ -1340,11 +1340,47 @@ table.results td.desc {
 }
 
 /* ---------- Aniversariantes ---------- */
+.aniv-months {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  max-width: 520px;
+}
+.aniv-month-group {
+  border-radius: var(--radius);
+}
+.aniv-month-group.current {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  padding: 14px 14px 16px;
+}
+.aniv-month-header {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.aniv-month-group.current .aniv-month-header {
+  color: var(--accent);
+}
+.aniv-month-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 12px;
+  padding: 2px 9px;
+}
 .aniv-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-width: 520px;
 }
 .aniv-row {
   display: flex;
