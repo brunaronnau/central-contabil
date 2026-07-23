@@ -52,7 +52,7 @@ export default function HomePage() {
         <div className="tool-card tool-card-placeholder">
           <span className="tc-icon">+</span>
           <h3>Próxima ferramenta</h3>
-          <p>Recados &amp; Metas (Mural) chega na próxima fase.</p>
+          <p>Peça para eu adicionar uma nova ferramenta aqui.</p>
         </div>
       </div>
     </section>

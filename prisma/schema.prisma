@@ -22,6 +22,12 @@ model User {
 
   suggestions     Suggestion[]
   suggestionVotes SuggestionVote[]
+  recados         Recado[]
+  recadoReacoes   RecadoReacao[]
+  votacoes        Votacao[]
+  votacaoVotos    VotacaoVoto[]
+  metas           Meta[]
+  metaNotas       MetaNota[]
 
   @@map("users")
 }
@@ -58,4 +64,140 @@ model SuggestionVote {
 
   @@unique([suggestionId, userId])
   @@map("suggestion_votes")
+}
+
+/* ==================== Mural & Metas (Recados & Metas) ==================== */
+
+model Recado {
+  id        String   @id @default(cuid())
+  text      String   @db.Text
+  pinned    Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  anexos  RecadoAnexo[]
+  reacoes RecadoReacao[]
+
+  @@map("recados")
+}
+
+model RecadoAnexo {
+  id      String @id @default(cuid())
+  nome    String
+  tipo    String
+  tamanho Int
+  dados   String @db.Text
+
+  recadoId String
+  recado   Recado @relation(fields: [recadoId], references: [id], onDelete: Cascade)
+
+  @@map("recado_anexos")
+}
+
+enum ReacaoTipo {
+  LIKE
+  HEART
+  DISLIKE
+}
+
+model RecadoReacao {
+  id   String     @id @default(cuid())
+  tipo ReacaoTipo
+
+  recadoId String
+  recado   Recado @relation(fields: [recadoId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([recadoId, userId])
+  @@map("recado_reacoes")
+}
+
+model Votacao {
+  id        String   @id @default(cuid())
+  titulo    String
+  createdAt DateTime @default(now())
+  encerraEm DateTime
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  opcoes VotacaoOpcao[]
+  votos  VotacaoVoto[]
+
+  @@map("votacoes")
+}
+
+model VotacaoOpcao {
+  id    String @id @default(cuid())
+  texto String
+  ordem Int    @default(0)
+
+  votacaoId String
+  votacao   Votacao @relation(fields: [votacaoId], references: [id], onDelete: Cascade)
+
+  votos VotacaoVoto[]
+
+  @@map("votacao_opcoes")
+}
+
+model VotacaoVoto {
+  id String @id @default(cuid())
+
+  votacaoId String
+  votacao   Votacao @relation(fields: [votacaoId], references: [id], onDelete: Cascade)
+  opcaoId   String
+  opcao     VotacaoOpcao @relation(fields: [opcaoId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([votacaoId, userId])
+  @@map("votacao_votos")
+}
+
+enum MetaStatus {
+  ABERTA
+  CONCLUIDA
+}
+
+enum MetaNotaTipo {
+  NOTA
+  CONCLUSAO
+  ALERTA
+}
+
+model Meta {
+  id          String     @id @default(cuid())
+  titulo      String
+  descricao   String     @db.Text
+  startDate   DateTime?  @db.Date
+  endDate     DateTime   @db.Date
+  reward      String?
+  status      MetaStatus @default(ABERTA)
+  createdAt   DateTime   @default(now())
+  completedAt DateTime?
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  notas MetaNota[]
+
+  @@map("metas")
+}
+
+model MetaNota {
+  id        String       @id @default(cuid())
+  text      String       @db.Text
+  tipo      MetaNotaTipo @default(NOTA)
+  createdAt DateTime     @default(now())
+
+  metaId   String
+  meta     Meta   @relation(fields: [metaId], references: [id], onDelete: Cascade)
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("meta_notas")
 }

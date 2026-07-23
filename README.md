@@ -6,7 +6,7 @@ com dados compartilhados entre toda a equipe.
 
 ## Status da migração
 
-Migração feita em fases. Fase atual: fundação + primeiros módulos.
+Migração feita em fases. Todos os módulos do legado já foram portados — próximos passos ficam a critério de quem for aprimorando a partir daqui (ex: integração real da Agenda com Microsoft 365, refinamentos visuais, novas ferramentas).
 
 - [x] Fundação: Next.js 16 (App Router), Prisma + Postgres, Docker Compose, login (Auth.js)
 - [x] Usuários (gestão de acesso)
@@ -17,7 +17,7 @@ Migração feita em fases. Fase atual: fundação + primeiros módulos.
 - [x] Gestão de Entregas
 - [x] Análise Tributária
 - [x] Agenda da Controladoria (protótipo com dados de exemplo — aguarda integração Microsoft 365)
-- [ ] Recados & Metas (Mural)
+- [x] Recados & Metas (Mural) — com backend real (Postgres), diferente do legado que era só localStorage/IndexedDB
 
 ## Rodando localmente (com Docker)
 

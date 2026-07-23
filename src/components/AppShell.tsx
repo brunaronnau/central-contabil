@@ -21,6 +21,7 @@ const UTILITY_NAV_ITEMS: NavItem[] = [
   { href: "/aniversariantes", icon: "🎂", label: "Aniversariantes" },
   { href: "/usuarios", icon: "👥", label: "Usuários" },
   { href: "/sugestoes", icon: "💡", label: "Sugestões" },
+  { href: "/mural", icon: "🎯", label: "Recados & Metas" },
 ];
 
 function initials(name: string) {
