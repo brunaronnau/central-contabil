@@ -15,8 +15,8 @@ export default function LoginPage() {
 
   return (
     <div className="auth-page">
+      <Image src="/navecon-logo.png" alt="Navecon" width={180} height={34} className="logo auth-logo" priority />
       <div className="auth-box">
-        <Image src="/navecon-logo.png" alt="Navecon" width={180} height={34} className="logo" priority />
         <p className="auth-title">Central Contábil</p>
         <p className="auth-sub">Entre com seu e-mail corporativo da Navecon.</p>
 

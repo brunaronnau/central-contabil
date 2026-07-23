@@ -28,8 +28,8 @@ export default function SignupPage() {
 
   return (
     <div className="auth-page">
+      <Image src="/navecon-logo.png" alt="Navecon" width={180} height={34} className="logo auth-logo" priority />
       <div className="auth-box">
-        <Image src="/navecon-logo.png" alt="Navecon" width={180} height={34} className="logo" priority />
         <p className="auth-title">Criar acesso</p>
         <p className="auth-sub">Use seu e-mail corporativo no formato nome_da_pessoa@navecon.net.br.</p>
 
