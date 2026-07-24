@@ -26,6 +26,8 @@ export type NotifyInput = {
   href?: string;
   /** Não notifica push para quem disparou a própria ação. */
   excludeUserId?: string;
+  /** Assunto de liderança — só aparece no sino/push de usuários administradores. */
+  apenasAdmin?: boolean;
 };
 
 /**
@@ -34,13 +36,16 @@ export type NotifyInput = {
  * do sistema operacional. Falha de push nunca derruba a ação que chamou —
  * o pior caso é a notificação não aparecer.
  */
-export async function notify({ kind, titulo, sub, href, excludeUserId }: NotifyInput) {
-  await prisma.notificacao.create({ data: { kind, titulo, sub, href } });
+export async function notify({ kind, titulo, sub, href, excludeUserId, apenasAdmin }: NotifyInput) {
+  await prisma.notificacao.create({ data: { kind, titulo, sub, href, apenasAdmin: apenasAdmin ?? false } });
 
   if (!configureWebPush()) return;
 
   const subs = await prisma.pushSubscription.findMany({
-    where: excludeUserId ? { userId: { not: excludeUserId } } : undefined,
+    where: {
+      ...(excludeUserId ? { userId: { not: excludeUserId } } : {}),
+      ...(apenasAdmin ? { user: { isAdmin: true } } : {}),
+    },
   });
   if (subs.length === 0) return;
 

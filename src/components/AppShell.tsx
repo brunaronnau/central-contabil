@@ -24,6 +24,8 @@ const UTILITY_NAV_ITEMS: NavItem[] = [
   { href: "/mural", icon: "🎯", label: "Recados & Metas" },
 ];
 
+const ADMIN_NAV_ITEMS: NavItem[] = [{ href: "/lideranca", icon: "🛡️", label: "Painel da Liderança" }];
+
 function initials(name: string) {
   return name
     .trim()
@@ -38,7 +40,7 @@ export function AppShell({
   user,
 }: {
   children: React.ReactNode;
-  user: { name: string; email: string; photo?: string | null };
+  user: { name: string; email: string; photo?: string | null; isAdmin: boolean };
 }) {
   return (
     <div className="app-shell">
@@ -62,6 +64,12 @@ export function AppShell({
               <span className="tn-icon">{item.icon}</span> {item.label}
             </Link>
           ))}
+          {user.isAdmin &&
+            ADMIN_NAV_ITEMS.map((item) => (
+              <Link key={item.href} href={item.href} className="tool-nav-item">
+                <span className="tn-icon">{item.icon}</span> {item.label}
+              </Link>
+            ))}
         </nav>
 
         <div className="sidebar-user">

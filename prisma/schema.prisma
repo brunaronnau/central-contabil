@@ -32,6 +32,9 @@ model User {
   metaNotas                MetaNota[]
   pushSubscriptions        PushSubscription[]
   aniversariosNotificados  AniversarioNotificado[]
+  liderancaNotas           LiderancaNota[]
+  liderancaEventos         LiderancaEvento[]
+  liderancaFerias          LiderancaFerias[]
 
   @@map("users")
 }
@@ -42,12 +45,13 @@ model User {
    (Web Push). "Lida" não é rastreado por notificação — abrir o painel do
    sino marca tudo como visto de uma vez (User.notifLastSeenAt). */
 model Notificacao {
-  id        String   @id @default(cuid())
-  kind      String
-  titulo    String
-  sub       String?
-  href      String?
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  kind        String
+  titulo      String
+  sub         String?
+  href        String?
+  apenasAdmin Boolean  @default(false)
+  createdAt   DateTime @default(now())
 
   @@index([createdAt])
   @@map("notificacoes")
@@ -294,4 +298,62 @@ model TributariaDadosMensais {
 
   @@unique([empresaId, ano])
   @@map("tributaria_dados_mensais")
+}
+
+/* ==================== Painel da Liderança ====================
+   Só administradores acessam (ver requireAdmin() nas actions e na página).
+   Sem nenhuma referência de/para outras ferramentas do site — assunto de
+   liderança fica isolado por completo dos dados dos demais módulos. */
+model LiderancaNota {
+  id        String              @id @default(cuid())
+  tipo      LiderancaNotaTipo
+  titulo    String
+  texto     String              @db.Text
+  status    LiderancaNotaStatus @default(ABERTA)
+  createdAt DateTime            @default(now())
+
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@map("lideranca_notas")
+}
+
+enum LiderancaNotaTipo {
+  OBSERVACAO
+  META
+}
+
+enum LiderancaNotaStatus {
+  ABERTA
+  CONCLUIDA
+}
+
+model LiderancaEvento {
+  id        String   @id @default(cuid())
+  data      DateTime @db.Date
+  titulo    String
+  descricao String?  @db.Text
+  createdAt DateTime @default(now())
+
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([data])
+  @@map("lideranca_eventos")
+}
+
+model LiderancaFerias {
+  id                String    @id @default(cuid())
+  colaborador       String
+  dataInicio        DateTime  @db.Date
+  dataFim           DateTime  @db.Date
+  observacao        String?
+  lembreteEnviadoEm DateTime?
+  createdAt         DateTime  @default(now())
+
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([dataInicio])
+  @@map("lideranca_ferias")
 }

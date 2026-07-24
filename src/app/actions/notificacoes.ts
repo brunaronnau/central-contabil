@@ -20,7 +20,11 @@ export async function listNotificacoes(): Promise<{ itens: NotificacaoItem[]; te
   const lastSeen = user?.notifLastSeenAt ?? new Date(0);
 
   const notificacoes = await prisma.notificacao.findMany({
-    where: user?.notifClearedAt ? { createdAt: { gt: user.notifClearedAt } } : undefined,
+    where: {
+      ...(user?.notifClearedAt ? { createdAt: { gt: user.notifClearedAt } } : {}),
+      // Assunto de liderança (ex.: aviso de férias) só aparece pra administradores.
+      ...(me.isAdmin ? {} : { apenasAdmin: false }),
+    },
     orderBy: { createdAt: "desc" },
     take: LIMITE_PAINEL,
   });
