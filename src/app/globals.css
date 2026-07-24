@@ -3009,3 +3009,39 @@ body.presentation-mode #tool-fiscal .chart-box h3 {
     display: none;
   }
 }
+#tool-lideranca .lid-cal-ferias {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #f5c518;
+  color: #3d2e00;
+  border-radius: 5px;
+  padding: 2px 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+#tool-lideranca .lid-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+#tool-lideranca .lid-section-head h2 {
+  margin: 0;
+}
+#tool-lideranca .lid-tag-ferias {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: #f5c518;
+  color: #3d2e00;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 700;
+  margin-right: 4px;
+}
+#tool-lideranca .lid-evento.ferias {
+  border-left: 4px solid #f5c518;
+}

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { criarFerias, excluirFerias } from "@/app/actions/lideranca";
 import { ExcluirButton } from "./ExcluirButton";
+import { ExportFeriasButton, type FeriasParaExportar } from "./ExportFeriasButton";
 
 const MESES = [
   "Janeiro",
@@ -45,6 +46,13 @@ export async function FeriasSection() {
     .map((mes) => ({ mes, itens: comMes.filter((f) => f.mes === mes) }))
     .filter((g) => g.itens.length > 0);
 
+  const paraExportar: FeriasParaExportar[] = ferias.map((f) => ({
+    colaborador: f.colaborador,
+    dataInicio: f.dataInicio.toISOString(),
+    dataFim: f.dataFim.toISOString(),
+    observacao: f.observacao,
+  }));
+
   return (
     <section className="lid-view active">
       {proximas.length > 0 && (
@@ -82,7 +90,10 @@ export async function FeriasSection() {
       </div>
 
       <div className="card">
-        <h2>Férias Programadas</h2>
+        <div className="lid-section-head">
+          <h2>Férias Programadas</h2>
+          <ExportFeriasButton ferias={paraExportar} />
+        </div>
         {grupos.length === 0 ? (
           <div className="empty-state">Nenhuma férias programada ainda.</div>
         ) : (

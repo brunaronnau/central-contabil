@@ -14,6 +14,13 @@ export type EventoGrid = {
   autor: string;
 };
 
+export type FeriasGrid = {
+  id: string;
+  colaborador: string;
+  inicio: string;
+  fim: string;
+};
+
 const MESES = [
   "Janeiro",
   "Fevereiro",
@@ -31,7 +38,7 @@ const MESES = [
 
 const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
-export function CalendarioGrid({ eventos }: { eventos: EventoGrid[] }) {
+export function CalendarioGrid({ eventos, ferias }: { eventos: EventoGrid[]; ferias: FeriasGrid[] }) {
   const hoje = new Date();
   const [mes, setMes] = useState(hoje.getUTCMonth());
   const [ano, setAno] = useState(hoje.getUTCFullYear());
@@ -65,6 +72,14 @@ export function CalendarioGrid({ eventos }: { eventos: EventoGrid[] }) {
       lista.push(e);
       eventosPorDia.set(e.dia, lista);
     }
+  }
+
+  const feriasRanges = ferias.map((f) => ({ ...f, inicioTs: new Date(f.inicio).getTime(), fimTs: new Date(f.fim).getTime() }));
+  const feriasPorDia = new Map<number, FeriasGrid[]>();
+  for (let d = 1; d <= diasNoMes; d++) {
+    const ts = Date.UTC(ano, mes, d);
+    const doDia = feriasRanges.filter((f) => ts >= f.inicioTs && ts <= f.fimTs);
+    if (doDia.length > 0) feriasPorDia.set(d, doDia);
   }
 
   const celulas: (number | null)[] = [];
@@ -103,6 +118,11 @@ export function CalendarioGrid({ eventos }: { eventos: EventoGrid[] }) {
               <>
                 <div className="lid-cal-numero">{dia}</div>
                 <div className="lid-cal-eventos">
+                  {(feriasPorDia.get(dia) ?? []).map((f) => (
+                    <div key={f.id} className="lid-cal-ferias" title={`Férias: ${f.colaborador}`}>
+                      <span className="lid-cal-evento-titulo">🏖 {f.colaborador}</span>
+                    </div>
+                  ))}
                   {(eventosPorDia.get(dia) ?? []).map((e) => (
                     <div key={e.id} className="lid-cal-evento" title={e.descricao ?? e.titulo}>
                       <span className="lid-cal-evento-titulo">{e.titulo}</span>
