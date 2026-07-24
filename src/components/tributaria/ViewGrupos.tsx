@@ -4,6 +4,12 @@ import { useState } from "react";
 import type { Grupo } from "@/lib/tributaria";
 import type { ViewKey } from "./TributariaClient";
 
+function fmtDataBase(data: string) {
+  const [ano, mes, dia] = data.split("-");
+  if (!ano || !mes || !dia) return data;
+  return `${dia}/${mes}/${ano}`;
+}
+
 export function ViewGrupos({
   grupos,
   carregando,
@@ -74,7 +80,12 @@ export function ViewGrupos({
                 {gruposFiltrados.map((g) => (
                   <div key={g.id} className="file-chip" style={{ padding: "10px 14px" }}>
                     <span className="name" style={{ fontFamily: "var(--sans)", maxWidth: "none" }}>
-                      {g.grupoNome} <span className="small-note">· {g.empresas.length} empresa(s)</span>
+                      <span style={{ fontSize: 15, fontWeight: 700 }}>{g.grupoNome}</span>{" "}
+                      <span className="small-note" style={{ fontStyle: "italic" }}>
+                        · {g.empresas.length} empresa(s)
+                        {g.grupoResponsavel && <> · Responsável: {g.grupoResponsavel}</>}
+                        {g.grupoData && <> · Data-base: {fmtDataBase(g.grupoData)}</>}
+                      </span>
                     </span>
                     <div style={{ display: "flex", gap: 8 }}>
                       <button className="btn secondary" style={{ padding: "5px 10px", fontSize: 12 }} onClick={() => onSelecionar(g.id)}>

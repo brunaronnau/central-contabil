@@ -58,6 +58,10 @@ export function ViewSetup({
           <label title="Apenas informativo — não entra em nenhum cálculo">Data-base</label>
           <input type="date" className="text-input" value={grupo.grupoData} onChange={(e) => onUpdateGrupo((g) => ({ ...g, grupoData: e.target.value }))} />
         </div>
+        <p className="small-note">
+          Atualize essa data toda vez que terminar de deixar os dados deste grupo em dia — ex.: se hoje você preencheu
+          os dados mensais e deixou tudo finalizado, a data-base deve ficar com a data de hoje.
+        </p>
       </div>
 
       <div className="card">
