@@ -35,8 +35,27 @@ model User {
   liderancaNotas           LiderancaNota[]
   liderancaEventos         LiderancaEvento[]
   liderancaFerias          LiderancaFerias[]
+  passwordResetTokens      PasswordResetToken[]
 
   @@map("users")
+}
+
+/* ==================== Redefinição de senha ====================
+   Token de uso único enviado por e-mail em "esqueci minha senha". Expira
+   sozinho (checado na hora de usar) e é marcado como usado pra não dar
+   pra reaproveitar o mesmo link duas vezes. */
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
 }
 
 /* ==================== Central de notificações ====================

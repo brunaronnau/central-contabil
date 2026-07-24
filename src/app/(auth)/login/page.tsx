@@ -37,6 +37,9 @@ export default function LoginPage() {
         </form>
 
         <p className="auth-switch">
+          <Link href="/esqueci-senha">Esqueci minha senha</Link>
+        </p>
+        <p className="auth-switch">
           Ainda não tem acesso? <Link href="/signup">Criar conta</Link>
         </p>
       </div>

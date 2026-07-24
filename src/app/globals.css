@@ -628,6 +628,15 @@ body {
   font-size: 12px;
   margin-bottom: 14px;
 }
+.auth-success {
+  background: var(--success-bg);
+  color: var(--success);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
 
 /* ---------- Sidebar: usuário logado ---------- */
 .sidebar-user {

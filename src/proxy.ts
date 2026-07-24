@@ -4,11 +4,18 @@ import { authConfig } from "@/auth.config";
 
 const { auth } = NextAuth(authConfig);
 
-const PUBLIC_PATHS = ["/login", "/signup"];
+// Só pra quem ainda não logou — não faz sentido acessar de novo já autenticado.
+const PUBLIC_ONLY_PATHS = ["/login", "/signup"];
+// Também não exigem sessão, mas continuam acessíveis mesmo pra quem já está
+// logado (ex.: clicar num link de redefinição de senha antigo enquanto já
+// tem uma sessão válida em outra aba não deveria só jogar pra home sem
+// explicação — a própria página decide se o token ainda é válido ou não).
+const PUBLIC_PATHS = [...PUBLIC_ONLY_PATHS, "/esqueci-senha", "/redefinir-senha"];
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  const isPublicOnly = PUBLIC_ONLY_PATHS.some((p) => pathname.startsWith(p));
 
   if (!req.auth && !isPublic) {
     const loginUrl = new URL("/login", req.nextUrl.origin);
@@ -16,7 +23,7 @@ export default auth((req) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (req.auth && isPublic) {
+  if (req.auth && isPublicOnly) {
     return NextResponse.redirect(new URL("/", req.nextUrl.origin));
   }
 });
