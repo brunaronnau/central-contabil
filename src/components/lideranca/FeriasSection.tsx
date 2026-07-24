@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { criarFerias, excluirFerias } from "@/app/actions/lideranca";
-import { ExcluirButton } from "./ExcluirButton";
+import { criarFerias } from "@/app/actions/lideranca";
+import { FeriasItem } from "./FeriasItem";
 import { ExportFeriasButton, type FeriasParaExportar } from "./ExportFeriasButton";
 
 const MESES = [
@@ -106,17 +106,17 @@ export async function FeriasSection() {
                 </div>
                 <div className="lid-evento-list">
                   {itens.map((f) => (
-                    <div key={f.id} className="lid-evento">
-                      <div className="lid-evento-data">
-                        {fmtData(f.dataInicio)} — {fmtData(f.dataFim)}
-                      </div>
-                      <div className="lid-evento-body">
-                        <div className="lid-evento-titulo">{f.colaborador}</div>
-                        {f.observacao && <div className="lid-evento-desc">{f.observacao}</div>}
-                        <div className="small-note">registrado por {f.author?.name ?? "Usuário removido"}</div>
-                      </div>
-                      <ExcluirButton action={excluirFerias.bind(null, f.id)} confirmMsg="Excluir este período de férias programado?" />
-                    </div>
+                    <FeriasItem
+                      key={f.id}
+                      ferias={{
+                        id: f.id,
+                        colaborador: f.colaborador,
+                        dataInicio: f.dataInicio.toISOString(),
+                        dataFim: f.dataFim.toISOString(),
+                        observacao: f.observacao,
+                        autor: f.author?.name ?? "Usuário removido",
+                      }}
+                    />
                   ))}
                 </div>
               </div>

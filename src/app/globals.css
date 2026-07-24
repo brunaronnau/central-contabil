@@ -3045,3 +3045,15 @@ body.presentation-mode #tool-fiscal .chart-box h3 {
 #tool-lideranca .lid-evento.ferias {
   border-left: 4px solid #f5c518;
 }
+#tool-lideranca .lid-evento-actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+#tool-lideranca .lid-evento-edit {
+  display: block;
+  padding: 14px 16px;
+}
+#tool-lideranca .lid-evento-edit .btn-row {
+  margin-top: 4px;
+}
