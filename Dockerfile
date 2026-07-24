@@ -10,6 +10,13 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# NEXT_PUBLIC_* é lido pelo navegador, então precisa estar disponível JÁ NO
+# BUILD (o Next.js grava o valor direto no bundle do cliente) — diferente das
+# demais variáveis, que o container só precisa em tempo de execução.
+ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
+ENV NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
+
 RUN npx prisma generate
 RUN npm run build
 RUN npm prune --omit=dev
