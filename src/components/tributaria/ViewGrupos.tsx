@@ -6,6 +6,7 @@ import type { ViewKey } from "./TributariaClient";
 
 export function ViewGrupos({
   grupos,
+  carregando,
   onCriar,
   onSelecionar,
   onExcluir,
@@ -14,6 +15,7 @@ export function ViewGrupos({
   onToggleApresentacao,
 }: {
   grupos: Grupo[];
+  carregando: boolean;
   onCriar: (nome: string) => void;
   onSelecionar: (id: string) => void;
   onExcluir: (id: string) => void;
@@ -52,7 +54,9 @@ export function ViewGrupos({
 
       <div className="card">
         <h2>Grupos Já Cadastrados</h2>
-        {grupos.length === 0 ? (
+        {carregando ? (
+          <div className="empty-state">Carregando grupos...</div>
+        ) : grupos.length === 0 ? (
           <div className="empty-state">Nenhum grupo cadastrado ainda.</div>
         ) : (
           <>

@@ -248,3 +248,50 @@ model MetaNota {
 
   @@map("meta_notas")
 }
+
+/* ==================== Análise Tributária ====================
+   Compartilhado entre todos os usuários (sem "dono") — qualquer um vê e edita
+   qualquer grupo, igual antes funcionava com localStorage, só que agora no
+   banco pra todo mundo enxergar a mesma coisa. */
+model TributariaGrupo {
+  id               String   @id @default(cuid())
+  grupoNome        String
+  grupoResponsavel String   @default("")
+  grupoData        String   @default("")
+  anoSelecionado   Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  empresas TributariaEmpresa[]
+
+  @@map("tributaria_grupos")
+}
+
+model TributariaEmpresa {
+  id              String @id @default(cuid())
+  nome            String
+  cnpj            String @default("")
+  atividade       String
+  regimeAtual     String
+  prejuizoInicial Float  @default(0)
+
+  grupoId String
+  grupo   TributariaGrupo @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+
+  dadosMensais TributariaDadosMensais[]
+
+  @@map("tributaria_empresas")
+}
+
+model TributariaDadosMensais {
+  id        String   @id @default(cuid())
+  ano       Int
+  dados     Json
+  updatedAt DateTime @updatedAt
+
+  empresaId String
+  empresa   TributariaEmpresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@unique([empresaId, ano])
+  @@map("tributaria_dados_mensais")
+}

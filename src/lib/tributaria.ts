@@ -196,28 +196,6 @@ export function anosComDados(grupo: Grupo): number[] {
   return Array.from(anos).sort((a, b) => a - b);
 }
 
-/* ==================== Persistência (localStorage) ==================== */
-
-const STORAGE_KEY = "navecon_analise_tributaria_grupos_v2";
-
-export function carregarGrupos(): Grupo[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as Grupo[];
-  } catch {
-    return [];
-  }
-}
-
-export function salvarGrupos(grupos: Grupo[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(grupos));
-  } catch {
-    // localStorage indisponível — não é crítico
-  }
-}
-
 /* ==================== Encargos de folha (GPS) ==================== */
 
 export type GpsResult = {
