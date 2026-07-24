@@ -36,14 +36,17 @@ model User {
   liderancaEventos         LiderancaEvento[]
   liderancaFerias          LiderancaFerias[]
   passwordResetTokens      PasswordResetToken[]
+  aniversarioEmailEnviados AniversarioEmailEnviado[]
 
   @@map("users")
 }
 
-/* ==================== Redefinição de senha ====================
-   Token de uso único enviado por e-mail em "esqueci minha senha". Expira
-   sozinho (checado na hora de usar) e é marcado como usado pra não dar
-   pra reaproveitar o mesmo link duas vezes. */
+/**
+ * ==================== Redefinição de senha ====================
+ * Token de uso único enviado por e-mail em "esqueci minha senha". Expira
+ * sozinho (checado na hora de usar) e é marcado como usado pra não dar
+ * pra reaproveitar o mesmo link duas vezes.
+ */
 model PasswordResetToken {
   id        String    @id @default(cuid())
   token     String    @unique
@@ -58,11 +61,13 @@ model PasswordResetToken {
   @@map("password_reset_tokens")
 }
 
-/* ==================== Central de notificações ====================
-   Canal único para os avisos que aparecem no sino da sidebar e, quando o
-   usuário ativa, também como notificação nativa do sistema operacional
-   (Web Push). "Lida" não é rastreado por notificação — abrir o painel do
-   sino marca tudo como visto de uma vez (User.notifLastSeenAt). */
+/**
+ * ==================== Central de notificações ====================
+ * Canal único para os avisos que aparecem no sino da sidebar e, quando o
+ * usuário ativa, também como notificação nativa do sistema operacional
+ * (Web Push). "Lida" não é rastreado por notificação — abrir o painel do
+ * sino marca tudo como visto de uma vez (User.notifLastSeenAt).
+ */
 model Notificacao {
   id          String   @id @default(cuid())
   kind        String
@@ -135,7 +140,9 @@ model SuggestionVote {
   @@map("suggestion_votes")
 }
 
-/* ==================== Mural & Metas (Recados & Metas) ==================== */
+/**
+ * ==================== Mural & Metas (Recados & Metas) ====================
+ */
 
 model Recado {
   id        String   @id @default(cuid())
@@ -145,7 +152,7 @@ model Recado {
   createdAt DateTime @default(now())
 
   authorId String?
-  author   User?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   anexos  RecadoAnexo[]
   reacoes RecadoReacao[]
@@ -177,9 +184,9 @@ model RecadoReacao {
   tipo ReacaoTipo
 
   recadoId String
-  recado   Recado @relation(fields: [recadoId], references: [id], onDelete: Cascade)
+  recado   Recado  @relation(fields: [recadoId], references: [id], onDelete: Cascade)
   userId   String?
-  user     User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([recadoId, userId])
   @@map("recado_reacoes")
@@ -193,7 +200,7 @@ model Votacao {
   notificouEncerramento Boolean  @default(false)
 
   authorId String?
-  author   User?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   opcoes VotacaoOpcao[]
   votos  VotacaoVoto[]
@@ -218,7 +225,7 @@ model VotacaoVoto {
   id String @id @default(cuid())
 
   votacaoId String
-  votacao   Votacao @relation(fields: [votacaoId], references: [id], onDelete: Cascade)
+  votacao   Votacao      @relation(fields: [votacaoId], references: [id], onDelete: Cascade)
   opcaoId   String
   opcao     VotacaoOpcao @relation(fields: [opcaoId], references: [id], onDelete: Cascade)
   userId    String?
@@ -251,7 +258,7 @@ model Meta {
   completedAt DateTime?
 
   authorId String?
-  author   User?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   notas MetaNota[]
 
@@ -265,17 +272,19 @@ model MetaNota {
   createdAt DateTime     @default(now())
 
   metaId   String
-  meta     Meta   @relation(fields: [metaId], references: [id], onDelete: Cascade)
+  meta     Meta    @relation(fields: [metaId], references: [id], onDelete: Cascade)
   authorId String?
-  author   User?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   @@map("meta_notas")
 }
 
-/* ==================== Análise Tributária ====================
-   Compartilhado entre todos os usuários (sem "dono") — qualquer um vê e edita
-   qualquer grupo, igual antes funcionava com localStorage, só que agora no
-   banco pra todo mundo enxergar a mesma coisa. */
+/**
+ * ==================== Análise Tributária ====================
+ * Compartilhado entre todos os usuários (sem "dono") — qualquer um vê e edita
+ * qualquer grupo, igual antes funcionava com localStorage, só que agora no
+ * banco pra todo mundo enxergar a mesma coisa.
+ */
 model TributariaGrupo {
   id               String   @id @default(cuid())
   grupoNome        String
@@ -319,10 +328,12 @@ model TributariaDadosMensais {
   @@map("tributaria_dados_mensais")
 }
 
-/* ==================== Painel da Liderança ====================
-   Só administradores acessam (ver requireAdmin() nas actions e na página).
-   Sem nenhuma referência de/para outras ferramentas do site — assunto de
-   liderança fica isolado por completo dos dados dos demais módulos. */
+/**
+ * ==================== Painel da Liderança ====================
+ * Só administradores acessam (ver requireAdmin() nas actions e na página).
+ * Sem nenhuma referência de/para outras ferramentas do site — assunto de
+ * liderança fica isolado por completo dos dados dos demais módulos.
+ */
 model LiderancaNota {
   id        String              @id @default(cuid())
   tipo      LiderancaNotaTipo
@@ -362,17 +373,49 @@ model LiderancaEvento {
 }
 
 model LiderancaFerias {
-  id                String    @id @default(cuid())
-  colaborador       String
-  dataInicio        DateTime  @db.Date
-  dataFim           DateTime  @db.Date
-  observacao        String?
-  lembreteEnviadoEm DateTime?
-  createdAt         DateTime  @default(now())
+  id                   String    @id @default(cuid())
+  colaborador          String
+  dataInicio           DateTime  @db.Date
+  dataFim              DateTime  @db.Date
+  observacao           String?
+  lembreteEnviadoEm    DateTime?
+  // Controle dos e-mails automáticos (distintos do aviso no sino acima):
+  // um 7 dias antes de começar e outro no próprio dia.
+  emailLembrete7diasEm DateTime?
+  emailLembreteDiaEm   DateTime?
+  createdAt            DateTime  @default(now())
 
   authorId String?
   author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   @@index([dataInicio])
   @@map("lideranca_ferias")
+}
+
+/**
+ * ==================== Relatórios automáticos por e-mail ====================
+ * Enviados pro e-mail de todos os administradores: um dígest mensal (todo dia
+ * 28, com férias e aniversariantes do mês seguinte) e lembretes individuais
+ * (7 dias antes e no dia) de férias e aniversários. Ver src/lib/cron-relatorios.ts
+ * — a checagem roda de verdade em segundo plano (node-cron), não depende de
+ * alguém abrir o site no dia certo.
+ */
+model AniversarioEmailEnviado {
+  id   String @id @default(cuid())
+  ano  Int
+  tipo String // "7DIAS" | "DIA"
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, ano, tipo])
+  @@map("aniversario_email_enviado")
+}
+
+model RelatorioMensalEnviado {
+  id        String   @id @default(cuid())
+  anoMes    String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("relatorio_mensal_enviado")
 }
