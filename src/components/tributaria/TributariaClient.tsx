@@ -47,6 +47,10 @@ export function TributariaClient() {
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingSaveRef = useRef<Grupo | null>(null);
+  // Ids excluídos localmente que ainda não foram confirmados como removidos
+  // no servidor — evita que um polling com resposta "atrasada" (ainda sem a
+  // exclusão) faça o grupo reaparecer por um instante.
+  const excluidosPendentesRef = useRef<Set<string>>(new Set());
 
   const flushSave = useCallback(() => {
     if (saveTimerRef.current) {
@@ -74,19 +78,43 @@ export function TributariaClient() {
 
   const carregar = useCallback(async () => {
     const servidor = await listarGrupos();
+    const servidorIds = new Set(servidor.map((g) => g.id));
+    // O servidor já não tem mais esses ids — a exclusão foi confirmada, não
+    // precisa mais "esconder" caso um poll futuro volte a incluí-los por engano.
+    for (const id of excluidosPendentesRef.current) {
+      if (!servidorIds.has(id)) excluidosPendentesRef.current.delete(id);
+    }
+
     setGrupos((prevLocal) => {
-      // Preserva a versão local do grupo que está sendo editado agora (pra não
-      // sobrescrever o que o usuário acabou de digitar com uma resposta do
-      // servidor que ainda não tem essa edição) — adota a versão do servidor
-      // pra todos os outros grupos, é onde aparecem as mudanças de terceiros.
+      // Combina local + servidor por id (em vez de simplesmente adotar o
+      // array do servidor) — um grupo recém-criado localmente pode ainda não
+      // ter chegado no servidor (a gravação é assíncrona/"fire and forget"),
+      // e se a gente só usasse o array do servidor, esse grupo sumiria da
+      // tela até o próximo poll. Preserva a versão local do grupo em edição
+      // (protegido) e do que ainda não foi confirmado no servidor; adota a
+      // versão do servidor pra tudo mais, é onde aparecem mudanças de terceiros.
       const ativo = protegidoIdRef.current;
-      return servidor.map((g) => {
-        if (ativo && g.id === ativo) {
-          const local = prevLocal.find((p) => p.id === g.id);
-          if (local) return local;
+      const servidorPorId = new Map(servidor.map((g) => [g.id, g]));
+      const localPorId = new Map(prevLocal.map((g) => [g.id, g]));
+      const idsTodos = new Set([...servidorPorId.keys(), ...localPorId.keys()]);
+
+      const resultado: Grupo[] = [];
+      for (const id of idsTodos) {
+        if (excluidosPendentesRef.current.has(id)) continue;
+        if (ativo && id === ativo) {
+          const local = localPorId.get(id);
+          if (local) resultado.push(local);
+          continue;
         }
-        return g;
-      });
+        const doServidor = servidorPorId.get(id);
+        if (doServidor) {
+          resultado.push(doServidor);
+        } else {
+          const local = localPorId.get(id);
+          if (local) resultado.push(local);
+        }
+      }
+      return resultado;
     });
   }, []);
 
@@ -148,8 +176,11 @@ export function TributariaClient() {
       pendingSaveRef.current = null;
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     }
+    excluidosPendentesRef.current.add(id);
     setGrupos((prev) => prev.filter((g) => g.id !== id));
-    excluirGrupoTributaria(id).catch(() => {});
+    excluirGrupoTributaria(id).catch(() => {
+      excluidosPendentesRef.current.delete(id);
+    });
     if (grupoAtivoId === id) {
       setGrupoAtivoId(null);
       setView("grupos");
