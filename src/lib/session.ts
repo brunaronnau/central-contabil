@@ -6,15 +6,18 @@ export async function requireUser() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  // A sessão (JWT) sobrevive à exclusão do usuário no banco; confirmamos que
-  // a conta ainda existe para que remover acesso em Usuários tenha efeito imediato.
-  const stillExists = await prisma.user.findUnique({
+  // A sessão (JWT) sobrevive à exclusão do usuário no banco e também não se
+  // atualiza sozinha quando o isAdmin muda (o token só grava isso no login) —
+  // por isso confirmamos aqui que a conta ainda existe e buscamos o isAdmin
+  // atual, pra "remover acesso" e "tornar admin" em Usuários terem efeito
+  // imediato, sem precisar a pessoa deslogar e logar de novo.
+  const dbUser = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true },
+    select: { isAdmin: true },
   });
-  if (!stillExists) redirect("/login");
+  if (!dbUser) redirect("/login");
 
-  return session.user;
+  return { ...session.user, isAdmin: dbUser.isAdmin };
 }
 
 export async function requireAdmin() {
