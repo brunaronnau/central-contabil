@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import { requireAdmin, requireUser } from "@/lib/session";
 import type { Atividade, Empresa, Grupo, MesesDados, RegimeAtual } from "@/lib/tributaria";
 import type { Prisma } from "@/generated/prisma/client";
 
@@ -40,7 +40,7 @@ export async function listarGrupos(): Promise<Grupo[]> {
 }
 
 export async function excluirGrupoTributaria(id: string): Promise<void> {
-  await requireUser();
+  await requireAdmin();
   await prisma.tributariaGrupo.delete({ where: { id } });
 }
 

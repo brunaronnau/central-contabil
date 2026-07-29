@@ -13,6 +13,7 @@ function fmtDataBase(data: string) {
 export function ViewGrupos({
   grupos,
   carregando,
+  isAdmin,
   onCriar,
   onSelecionar,
   onExcluir,
@@ -22,6 +23,7 @@ export function ViewGrupos({
 }: {
   grupos: Grupo[];
   carregando: boolean;
+  isAdmin: boolean;
   onCriar: (nome: string) => void;
   onSelecionar: (id: string) => void;
   onExcluir: (id: string) => void;
@@ -91,9 +93,11 @@ export function ViewGrupos({
                       <button className="btn secondary" style={{ padding: "5px 10px", fontSize: 12 }} onClick={() => onSelecionar(g.id)}>
                         Selecionar
                       </button>
-                      <button className="user-del-btn" onClick={() => onExcluir(g.id)}>
-                        Excluir Grupo
-                      </button>
+                      {isAdmin && (
+                        <button className="user-del-btn" onClick={() => onExcluir(g.id)}>
+                          Excluir Grupo
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

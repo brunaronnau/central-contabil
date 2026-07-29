@@ -27,7 +27,7 @@ const POLL_MS = 15000;
 // de salvar no servidor, pra não disparar uma gravação a cada tecla.
 const SAVE_DEBOUNCE_MS = 800;
 
-export function TributariaClient() {
+export function TributariaClient({ isAdmin }: { isAdmin: boolean }) {
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [grupoAtivoId, setGrupoAtivoId] = useState<string | null>(null);
@@ -236,6 +236,7 @@ export function TributariaClient() {
           <ViewGrupos
             grupos={grupos}
             carregando={carregando}
+            isAdmin={isAdmin}
             onCriar={criarGrupo}
             onSelecionar={selecionarGrupo}
             onExcluir={excluirGrupo}
