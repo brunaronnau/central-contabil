@@ -24,7 +24,7 @@ export type EmpresaData = {
   semMovimentacaoConfirmadoEm: string;
   tributacoes: { id: string; regime: string; dataInicio: string; dataFim: string }[];
   analistas: { id: string; nomeAnalista: string; dataInicio: string; dataFim: string }[];
-  anexos: { id: string; nome: string; tamanho: number; observacao: string | null; createdAt: string }[];
+  anexos: { id: string; nome: string; tipo: string; tamanho: number; observacao: string | null; createdAt: string }[];
   observacoes: { id: string; texto: string; createdAt: string; autor: string }[];
 };
 
@@ -48,12 +48,17 @@ function fmtTamanho(bytes: number) {
 export function EmpresaCard({ empresa: emp, isAdmin }: { empresa: EmpresaData; isAdmin: boolean }) {
   const [aberta, setAberta] = useState(false);
   const [localDocumentos, setLocalDocumentos] = useState<FichaLocalDocumentos>(emp.localDocumentos);
+  const [localDocumentosOutro, setLocalDocumentosOutro] = useState(emp.localDocumentosOutro ?? "");
   const [semMovimentacao, setSemMovimentacao] = useState(emp.semMovimentacao);
+
+  const tagLocal = localDocumentos === "OUTRO" && localDocumentosOutro ? localDocumentosOutro : LOCAL_DOCS_LABEL[localDocumentos];
 
   return (
     <div className={`company${aberta ? " open" : ""}`}>
       <div className="head" onClick={() => setAberta((v) => !v)}>
-        <span>{emp.nome || "(empresa sem nome)"}</span>
+        <span>
+          {emp.nome || "(empresa sem nome)"} <span className="ficha-tag">{tagLocal}</span>
+        </span>
         <span className="small-note">{aberta ? "▲" : "▼"}</span>
       </div>
       <div className="body">
@@ -87,7 +92,12 @@ export function EmpresaCard({ empresa: emp, isAdmin }: { empresa: EmpresaData; i
           {localDocumentos === "OUTRO" && (
             <div className="field-row">
               <label>Qual local</label>
-              <input className="text-input" name="localDocumentosOutro" defaultValue={emp.localDocumentosOutro ?? ""} />
+              <input
+                className="text-input"
+                name="localDocumentosOutro"
+                value={localDocumentosOutro}
+                onChange={(e) => setLocalDocumentosOutro(e.target.value)}
+              />
             </div>
           )}
           <div className="field-row">
@@ -127,13 +137,17 @@ export function EmpresaCard({ empresa: emp, isAdmin }: { empresa: EmpresaData; i
               ))}
             </ul>
           )}
-          <form action={adicionarTributacao.bind(null, emp.id)} className="field-row" style={{ gridTemplateColumns: "1fr 160px auto", marginTop: 8 }}>
+          <form action={adicionarTributacao.bind(null, emp.id)} className="field-row" style={{ gridTemplateColumns: "1fr 150px 150px auto", marginTop: 8 }}>
             <input className="text-input" name="regime" placeholder="Ex.: Simples Nacional" required />
-            <input className="text-input" type="date" name="dataInicio" required />
+            <input className="text-input" type="date" name="dataInicio" title="Data início" required />
+            <input className="text-input" type="date" name="dataFim" title="Data fim (deixe em branco se ainda for o regime atual)" />
             <button className="btn secondary" type="submit">
               Registrar
             </button>
           </form>
+          <p className="small-note" style={{ marginTop: 4 }}>
+            Início e fim (fim em branco = regime atual da empresa).
+          </p>
         </div>
 
         <div className="ficha-sub">
@@ -149,13 +163,17 @@ export function EmpresaCard({ empresa: emp, isAdmin }: { empresa: EmpresaData; i
               ))}
             </ul>
           )}
-          <form action={adicionarAnalista.bind(null, emp.id)} className="field-row" style={{ gridTemplateColumns: "1fr 160px auto", marginTop: 8 }}>
+          <form action={adicionarAnalista.bind(null, emp.id)} className="field-row" style={{ gridTemplateColumns: "1fr 150px 150px auto", marginTop: 8 }}>
             <input className="text-input" name="nomeAnalista" placeholder="Nome do analista" required />
-            <input className="text-input" type="date" name="dataInicio" required />
+            <input className="text-input" type="date" name="dataInicio" title="Data início" required />
+            <input className="text-input" type="date" name="dataFim" title="Data fim (deixe em branco se ainda for o analista atual)" />
             <button className="btn secondary" type="submit">
               Registrar
             </button>
           </form>
+          <p className="small-note" style={{ marginTop: 4 }}>
+            Início e fim (fim em branco = analista atual da empresa).
+          </p>
         </div>
 
         <div className="ficha-sub">
@@ -163,18 +181,28 @@ export function EmpresaCard({ empresa: emp, isAdmin }: { empresa: EmpresaData; i
           {emp.anexos.length === 0 ? (
             <div className="empty-state">Nenhum anexo ainda.</div>
           ) : (
-            <ul className="ficha-historico-list">
-              {emp.anexos.map((a) => (
-                <li key={a.id}>
-                  <a href={`/api/ficha/anexo/${a.id}`} download={a.nome}>
-                    📎 {a.nome}
-                  </a>{" "}
-                  <span className="small-note">
-                    ({fmtTamanho(a.tamanho)} · {new Date(a.createdAt).toLocaleDateString("pt-BR")})
-                  </span>
-                  {a.observacao && <div className="small-note">{a.observacao}</div>}
-                </li>
-              ))}
+            <ul className="ficha-historico-list ficha-anexos-list">
+              {emp.anexos.map((a) => {
+                const imagem = a.tipo.startsWith("image/");
+                return (
+                  <li key={a.id} className={imagem ? "ficha-anexo-imagem" : ""}>
+                    {imagem ? (
+                      <a href={`/api/ficha/anexo/${a.id}`} target="_blank" rel="noopener noreferrer" title={a.nome}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={`/api/ficha/anexo/${a.id}`} alt={a.nome} className="ficha-anexo-thumb" />
+                      </a>
+                    ) : (
+                      <a href={`/api/ficha/anexo/${a.id}`} download={a.nome}>
+                        📎 {a.nome}
+                      </a>
+                    )}
+                    <span className="small-note">
+                      ({fmtTamanho(a.tamanho)} · {new Date(a.createdAt).toLocaleDateString("pt-BR")})
+                    </span>
+                    {a.observacao && <div className="small-note">{a.observacao}</div>}
+                  </li>
+                );
+              })}
             </ul>
           )}
           <form action={adicionarAnexo} encType="multipart/form-data" style={{ marginTop: 8 }}>

@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { criarGrupo, excluirGrupo } from "@/app/actions/ficha";
-import { ExcluirButton } from "./ExcluirButton";
+import { criarGrupo } from "@/app/actions/ficha";
+import { GruposFiltrados } from "./GruposFiltrados";
 
 export async function ListaGrupos({ isAdmin }: { isAdmin: boolean }) {
   const grupos = await prisma.fichaGrupo.findMany({
@@ -23,34 +22,7 @@ export async function ListaGrupos({ isAdmin }: { isAdmin: boolean }) {
 
       <div className="card">
         <h2>Grupos Cadastrados</h2>
-        {grupos.length === 0 ? (
-          <div className="empty-state">Nenhum grupo cadastrado ainda.</div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {grupos.map((g) => (
-              <div key={g.id} className="file-chip" style={{ padding: "10px 14px" }}>
-                <span className="name" style={{ fontFamily: "var(--sans)", maxWidth: "none" }}>
-                  <span style={{ fontSize: 15, fontWeight: 700 }}>{g.nome}</span>{" "}
-                  <span className="small-note" style={{ fontStyle: "italic" }}>
-                    · {g._count.empresas} empresa(s)
-                  </span>
-                </span>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <Link href={`/ficha-empresas?tab=setup&grupo=${g.id}`} className="btn secondary" style={{ padding: "5px 10px", fontSize: 12 }}>
-                    Selecionar
-                  </Link>
-                  {isAdmin && (
-                    <ExcluirButton
-                      action={excluirGrupo.bind(null, g.id)}
-                      confirmMsg="Excluir este grupo e todas as empresas/histórico cadastrados nele? Essa ação não pode ser desfeita."
-                      label="Excluir Grupo"
-                    />
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <GruposFiltrados grupos={grupos.map((g) => ({ id: g.id, nome: g.nome, empresas: g._count.empresas }))} isAdmin={isAdmin} />
       </div>
     </>
   );

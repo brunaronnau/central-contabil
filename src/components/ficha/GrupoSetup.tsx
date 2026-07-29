@@ -50,6 +50,7 @@ export async function GrupoSetup({ grupoId, isAdmin }: { grupoId: string; isAdmi
     anexos: e.anexos.map((a) => ({
       id: a.id,
       nome: a.nome,
+      tipo: a.tipo,
       tamanho: a.tamanho,
       observacao: a.observacao,
       createdAt: a.createdAt.toISOString(),
@@ -76,9 +77,7 @@ export async function GrupoSetup({ grupoId, isAdmin }: { grupoId: string; isAdmi
             <input className="text-input" type="date" name="dataEntrada" defaultValue={toDateInput(grupo.dataEntrada)} />
           </div>
           <details open={!!(grupo.contabilidadeAnteriorNome || grupo.contabilidadeAnteriorCelular || grupo.contabilidadeAnteriorEmail)}>
-            <summary className="btn secondary" style={{ marginBottom: 10 }}>
-              Contabilidade anterior (de onde o grupo veio)
-            </summary>
+            <summary className="ficha-toggle-discreto">Contabilidade anterior</summary>
             <div className="field-row">
               <label>Nome da contabilidade</label>
               <input className="text-input" name="contabilidadeAnteriorNome" defaultValue={grupo.contabilidadeAnteriorNome ?? ""} />
@@ -98,9 +97,7 @@ export async function GrupoSetup({ grupoId, isAdmin }: { grupoId: string; isAdmi
             <input className="text-input" type="date" name="dataSaida" defaultValue={toDateInput(grupo.dataSaida)} />
           </div>
           <details open={!!(grupo.contabilidadeNovaNome || grupo.contabilidadeNovaCelular || grupo.contabilidadeNovaEmail)}>
-            <summary className="btn secondary" style={{ marginBottom: 10 }}>
-              Nova contabilidade (para onde o grupo foi)
-            </summary>
+            <summary className="ficha-toggle-discreto">Nova contabilidade</summary>
             <div className="field-row">
               <label>Nome da contabilidade</label>
               <input className="text-input" name="contabilidadeNovaNome" defaultValue={grupo.contabilidadeNovaNome ?? ""} />

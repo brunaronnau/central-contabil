@@ -104,13 +104,20 @@ export async function adicionarTributacao(empresaId: string, formData: FormData)
   await requireUser();
   const regime = String(formData.get("regime") ?? "").trim();
   const dataInicio = dataOuNull(formData.get("dataInicio"));
+  const dataFim = dataOuNull(formData.get("dataFim"));
   if (!regime || !dataInicio) return;
 
-  const atual = await prisma.fichaTributacaoHistorico.findFirst({ where: { empresaId, dataFim: null } });
-  if (atual) {
-    await prisma.fichaTributacaoHistorico.update({ where: { id: atual.id }, data: { dataFim: diaAnterior(dataInicio) } });
+  // Só fecha automaticamente o registro "vigente" anterior quando o novo já
+  // nasce sem data-fim (ou seja, é o novo regime atual) — se quem preencheu
+  // já informou a própria data-fim (registro histórico avulso), não mexe em
+  // mais nada.
+  if (!dataFim) {
+    const atual = await prisma.fichaTributacaoHistorico.findFirst({ where: { empresaId, dataFim: null } });
+    if (atual) {
+      await prisma.fichaTributacaoHistorico.update({ where: { id: atual.id }, data: { dataFim: diaAnterior(dataInicio) } });
+    }
   }
-  await prisma.fichaTributacaoHistorico.create({ data: { empresaId, regime, dataInicio } });
+  await prisma.fichaTributacaoHistorico.create({ data: { empresaId, regime, dataInicio, dataFim } });
   revalidatePath(PATH);
 }
 
@@ -120,13 +127,16 @@ export async function adicionarAnalista(empresaId: string, formData: FormData) {
   await requireUser();
   const nomeAnalista = String(formData.get("nomeAnalista") ?? "").trim();
   const dataInicio = dataOuNull(formData.get("dataInicio"));
+  const dataFim = dataOuNull(formData.get("dataFim"));
   if (!nomeAnalista || !dataInicio) return;
 
-  const atual = await prisma.fichaAnalistaHistorico.findFirst({ where: { empresaId, dataFim: null } });
-  if (atual) {
-    await prisma.fichaAnalistaHistorico.update({ where: { id: atual.id }, data: { dataFim: diaAnterior(dataInicio) } });
+  if (!dataFim) {
+    const atual = await prisma.fichaAnalistaHistorico.findFirst({ where: { empresaId, dataFim: null } });
+    if (atual) {
+      await prisma.fichaAnalistaHistorico.update({ where: { id: atual.id }, data: { dataFim: diaAnterior(dataInicio) } });
+    }
   }
-  await prisma.fichaAnalistaHistorico.create({ data: { empresaId, nomeAnalista, dataInicio } });
+  await prisma.fichaAnalistaHistorico.create({ data: { empresaId, nomeAnalista, dataInicio, dataFim } });
   revalidatePath(PATH);
 }
 
