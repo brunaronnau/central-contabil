@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { criarEmpresa, salvarGrupo } from "@/app/actions/ficha";
 import { EmpresaCard, type EmpresaData } from "./EmpresaCard";
+import { ExportGrupoButton } from "./ExportGrupoButton";
 
 function toDateInput(d: Date | null) {
   return d ? d.toISOString().slice(0, 10) : "";
@@ -15,7 +16,10 @@ export async function GrupoSetup({ grupoId, isAdmin }: { grupoId: string; isAdmi
         include: {
           tributacoes: { orderBy: { dataInicio: "asc" } },
           analistas: { orderBy: { dataInicio: "asc" } },
-          anexos: { orderBy: { createdAt: "asc" }, select: { id: true, nome: true, tipo: true, tamanho: true, observacao: true, createdAt: true } },
+          anexos: {
+            orderBy: { createdAt: "asc" },
+            select: { id: true, nome: true, tipo: true, tamanho: true, observacao: true, semMovimentacao: true, createdAt: true },
+          },
           observacoes: { orderBy: { createdAt: "asc" }, include: { author: { select: { name: true } } } },
         },
       },
@@ -53,6 +57,7 @@ export async function GrupoSetup({ grupoId, isAdmin }: { grupoId: string; isAdmi
       tipo: a.tipo,
       tamanho: a.tamanho,
       observacao: a.observacao,
+      semMovimentacao: a.semMovimentacao,
       createdAt: a.createdAt.toISOString(),
     })),
     observacoes: e.observacoes.map((o) => ({
@@ -66,7 +71,23 @@ export async function GrupoSetup({ grupoId, isAdmin }: { grupoId: string; isAdmi
   return (
     <>
       <div className="card">
-        <h2>Dados do Grupo</h2>
+        <div className="ficha-card-head">
+          <h2>🏢 Dados do Grupo</h2>
+          <ExportGrupoButton
+            grupo={{
+              nome: grupo.nome,
+              dataEntrada: toDateInput(grupo.dataEntrada),
+              dataSaida: toDateInput(grupo.dataSaida),
+              contabilidadeAnteriorNome: grupo.contabilidadeAnteriorNome,
+              contabilidadeAnteriorCelular: grupo.contabilidadeAnteriorCelular,
+              contabilidadeAnteriorEmail: grupo.contabilidadeAnteriorEmail,
+              contabilidadeNovaNome: grupo.contabilidadeNovaNome,
+              contabilidadeNovaCelular: grupo.contabilidadeNovaCelular,
+              contabilidadeNovaEmail: grupo.contabilidadeNovaEmail,
+              empresas,
+            }}
+          />
+        </div>
         <form action={salvarGrupo.bind(null, grupo.id)}>
           <div className="field-row">
             <label>Nome do grupo</label>
@@ -121,10 +142,10 @@ export async function GrupoSetup({ grupoId, isAdmin }: { grupoId: string; isAdmi
       </div>
 
       <div className="card">
-        <h2>Empresas do Grupo</h2>
+        <h2>📇 Empresas do Grupo</h2>
         {empresas.length === 0 && <div className="empty-state">Nenhuma empresa cadastrada ainda.</div>}
         {empresas.map((emp) => (
-          <EmpresaCard key={emp.id} empresa={emp} isAdmin={isAdmin} />
+          <EmpresaCard key={emp.id} empresa={emp} isAdmin={isAdmin} grupoNome={grupo.nome} />
         ))}
 
         <form action={criarEmpresa.bind(null, grupo.id)} className="btn-row" style={{ marginTop: 8 }}>

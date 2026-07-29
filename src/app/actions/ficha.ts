@@ -146,6 +146,7 @@ export async function adicionarAnexo(formData: FormData) {
   const user = await requireUser();
   const empresaId = String(formData.get("empresaId") ?? "");
   const observacao = String(formData.get("observacao") ?? "").trim();
+  const semMovimentacao = formData.get("semMovimentacao") === "on";
   const file = formData.get("arquivo");
   if (!empresaId || !(file instanceof File) || file.size === 0) return;
   if (file.size > ANEXO_MAX_BYTES) {
@@ -161,6 +162,7 @@ export async function adicionarAnexo(formData: FormData) {
       tamanho: file.size,
       dados: buffer.toString("base64"),
       observacao: observacao || null,
+      semMovimentacao,
       authorId: user.id,
     },
   });

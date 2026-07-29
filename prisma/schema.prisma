@@ -520,13 +520,17 @@ model FichaAnalistaHistorico {
 }
 
 model FichaAnexo {
-  id         String   @id @default(cuid())
-  nome       String
-  tipo       String
-  tamanho    Int
-  dados      String   @db.Text
-  observacao String?  @db.Text
-  createdAt  DateTime @default(now())
+  id              String   @id @default(cuid())
+  nome            String
+  tipo            String
+  tamanho         Int
+  dados           String   @db.Text
+  observacao      String?  @db.Text
+  // Marca prints anexados como comprovante de "empresa sem movimentação"
+  // (aparecem numa lista à parte, junto da confirmação, em vez de nos
+  // anexos gerais).
+  semMovimentacao Boolean  @default(false)
+  createdAt       DateTime @default(now())
 
   empresaId String
   empresa   FichaEmpresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)

@@ -3110,6 +3110,17 @@ body.presentation-mode #tool-fiscal .chart-box h3 {
   font-weight: 600;
   margin: 0 0 14px;
 }
+#tool-ficha .ficha-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+#tool-ficha .ficha-card-head h2 {
+  margin: 0;
+}
 #tool-ficha .company {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -3130,20 +3141,26 @@ body.presentation-mode #tool-fiscal .chart-box h3 {
   display: none;
   padding: 16px;
   border-top: 1px solid var(--line);
+  background: var(--paper);
 }
 #tool-ficha .company.open .body {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 #tool-ficha .ficha-sub {
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px dashed var(--line);
+  padding: 14px 16px;
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+  border-radius: 8px;
 }
 #tool-ficha .ficha-sub h3 {
   font-family: var(--serif);
   font-size: 13.5px;
   font-weight: 600;
-  margin: 0 0 10px;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
 }
 #tool-ficha .ficha-historico-list {
   list-style: none;
@@ -3161,11 +3178,18 @@ body.presentation-mode #tool-fiscal .chart-box h3 {
   border-radius: 6px;
 }
 #tool-ficha details {
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 #tool-ficha details summary {
   cursor: pointer;
   width: fit-content;
+  margin-bottom: 8px;
+}
+#tool-ficha details[open] {
+  padding: 10px 12px 2px;
+  border-left: 2px solid var(--accent-soft);
+  background: var(--paper);
+  border-radius: 0 6px 6px 0;
 }
 #tool-ficha .ficha-toggle-discreto {
   font-size: 12px;

@@ -11,6 +11,7 @@ import {
   salvarEmpresaCampos,
 } from "@/app/actions/ficha";
 import { ExcluirButton } from "./ExcluirButton";
+import { ExportEmpresaButton } from "./ExportEmpresaButton";
 
 export type EmpresaData = {
   id: string;
@@ -24,7 +25,7 @@ export type EmpresaData = {
   semMovimentacaoConfirmadoEm: string;
   tributacoes: { id: string; regime: string; dataInicio: string; dataFim: string }[];
   analistas: { id: string; nomeAnalista: string; dataInicio: string; dataFim: string }[];
-  anexos: { id: string; nome: string; tipo: string; tamanho: number; observacao: string | null; createdAt: string }[];
+  anexos: { id: string; nome: string; tipo: string; tamanho: number; observacao: string | null; semMovimentacao: boolean; createdAt: string }[];
   observacoes: { id: string; texto: string; createdAt: string; autor: string }[];
 };
 
@@ -45,13 +46,39 @@ function fmtTamanho(bytes: number) {
   return bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(0)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-export function EmpresaCard({ empresa: emp, isAdmin }: { empresa: EmpresaData; isAdmin: boolean }) {
+type AnexoData = EmpresaData["anexos"][number];
+
+function AnexoPreview({ anexo }: { anexo: AnexoData }) {
+  const imagem = anexo.tipo.startsWith("image/");
+  return (
+    <li className={imagem ? "ficha-anexo-imagem" : ""}>
+      {imagem ? (
+        <a href={`/api/ficha/anexo/${anexo.id}`} target="_blank" rel="noopener noreferrer" title={anexo.nome}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={`/api/ficha/anexo/${anexo.id}`} alt={anexo.nome} className="ficha-anexo-thumb" />
+        </a>
+      ) : (
+        <a href={`/api/ficha/anexo/${anexo.id}`} download={anexo.nome}>
+          📎 {anexo.nome}
+        </a>
+      )}
+      <span className="small-note">
+        ({fmtTamanho(anexo.tamanho)} · {new Date(anexo.createdAt).toLocaleDateString("pt-BR")})
+      </span>
+      {anexo.observacao && <div className="small-note">{anexo.observacao}</div>}
+    </li>
+  );
+}
+
+export function EmpresaCard({ empresa: emp, isAdmin, grupoNome }: { empresa: EmpresaData; isAdmin: boolean; grupoNome: string }) {
   const [aberta, setAberta] = useState(false);
   const [localDocumentos, setLocalDocumentos] = useState<FichaLocalDocumentos>(emp.localDocumentos);
   const [localDocumentosOutro, setLocalDocumentosOutro] = useState(emp.localDocumentosOutro ?? "");
   const [semMovimentacao, setSemMovimentacao] = useState(emp.semMovimentacao);
 
   const tagLocal = localDocumentos === "OUTRO" && localDocumentosOutro ? localDocumentosOutro : LOCAL_DOCS_LABEL[localDocumentos];
+  const anexosSemMovimentacao = emp.anexos.filter((a) => a.semMovimentacao);
+  const anexosGerais = emp.anexos.filter((a) => !a.semMovimentacao);
 
   return (
     <div className={`company${aberta ? " open" : ""}`}>
@@ -62,7 +89,9 @@ export function EmpresaCard({ empresa: emp, isAdmin }: { empresa: EmpresaData; i
         <span className="small-note">{aberta ? "▲" : "▼"}</span>
       </div>
       <div className="body">
-        <form action={salvarEmpresaCampos.bind(null, emp.id)}>
+        <div className="ficha-sub">
+          <h3>📋 Dados Básicos</h3>
+          <form action={salvarEmpresaCampos.bind(null, emp.id)}>
           <div className="field-row">
             <label>Nome</label>
             <input className="text-input" name="nome" defaultValue={emp.nome} required />
@@ -110,10 +139,14 @@ export function EmpresaCard({ empresa: emp, isAdmin }: { empresa: EmpresaData; i
               <input className="text-input" type="date" name="semMovimentacaoConfirmadoEm" defaultValue={emp.semMovimentacaoConfirmadoEm} />
             </div>
           )}
-          <div className="btn-row" style={{ marginTop: 10 }}>
-            <button className="btn" type="submit">
-              Salvar Dados da Empresa
-            </button>
+            <div className="btn-row" style={{ marginTop: 10 }}>
+              <button className="btn" type="submit">
+                Salvar Dados da Empresa
+              </button>
+            </div>
+          </form>
+          <div className="btn-row" style={{ marginTop: 8 }}>
+            <ExportEmpresaButton grupoNome={grupoNome} empresa={emp} />
             {isAdmin && (
               <ExcluirButton
                 action={excluirEmpresa.bind(null, emp.id)}
@@ -122,10 +155,10 @@ export function EmpresaCard({ empresa: emp, isAdmin }: { empresa: EmpresaData; i
               />
             )}
           </div>
-        </form>
+        </div>
 
         <div className="ficha-sub">
-          <h3>Histórico de Tributação</h3>
+          <h3>💰 Histórico de Tributação</h3>
           {emp.tributacoes.length === 0 ? (
             <div className="empty-state">Nenhuma tributação registrada ainda.</div>
           ) : (
@@ -158,7 +191,7 @@ export function EmpresaCard({ empresa: emp, isAdmin }: { empresa: EmpresaData; i
         </div>
 
         <div className="ficha-sub">
-          <h3>Analista Responsável</h3>
+          <h3>👤 Analista Responsável</h3>
           {emp.analistas.length === 0 ? (
             <div className="empty-state">Nenhum analista registrado ainda.</div>
           ) : (
@@ -183,36 +216,50 @@ export function EmpresaCard({ empresa: emp, isAdmin }: { empresa: EmpresaData; i
           </p>
         </div>
 
+        {semMovimentacao && (
+          <div className="ficha-sub">
+            <h3>🚫 Comprovação de Sem Movimentação</h3>
+            {anexosSemMovimentacao.length === 0 ? (
+              <div className="empty-state">Nenhum print anexado ainda.</div>
+            ) : (
+              <ul className="ficha-historico-list ficha-anexos-list">
+                {anexosSemMovimentacao.map((a) => (
+                  <AnexoPreview key={a.id} anexo={a} />
+                ))}
+              </ul>
+            )}
+            <form action={adicionarAnexo} style={{ marginTop: 8 }}>
+              <input type="hidden" name="empresaId" value={emp.id} />
+              <input type="hidden" name="semMovimentacao" value="on" />
+              <div className="field-row">
+                <label>Print</label>
+                <input type="file" name="arquivo" required />
+              </div>
+              <div className="field-row">
+                <label>Observação</label>
+                <input className="text-input" name="observacao" placeholder="Ex.: extrato bancário sem lançamentos" />
+              </div>
+              <div className="btn-row">
+                <button className="btn secondary" type="submit">
+                  Anexar Comprovação
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
         <div className="ficha-sub">
-          <h3>Anexos (prints)</h3>
-          {emp.anexos.length === 0 ? (
+          <h3>📎 Anexos (prints)</h3>
+          {anexosGerais.length === 0 ? (
             <div className="empty-state">Nenhum anexo ainda.</div>
           ) : (
             <ul className="ficha-historico-list ficha-anexos-list">
-              {emp.anexos.map((a) => {
-                const imagem = a.tipo.startsWith("image/");
-                return (
-                  <li key={a.id} className={imagem ? "ficha-anexo-imagem" : ""}>
-                    {imagem ? (
-                      <a href={`/api/ficha/anexo/${a.id}`} target="_blank" rel="noopener noreferrer" title={a.nome}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={`/api/ficha/anexo/${a.id}`} alt={a.nome} className="ficha-anexo-thumb" />
-                      </a>
-                    ) : (
-                      <a href={`/api/ficha/anexo/${a.id}`} download={a.nome}>
-                        📎 {a.nome}
-                      </a>
-                    )}
-                    <span className="small-note">
-                      ({fmtTamanho(a.tamanho)} · {new Date(a.createdAt).toLocaleDateString("pt-BR")})
-                    </span>
-                    {a.observacao && <div className="small-note">{a.observacao}</div>}
-                  </li>
-                );
-              })}
+              {anexosGerais.map((a) => (
+                <AnexoPreview key={a.id} anexo={a} />
+              ))}
             </ul>
           )}
-          <form action={adicionarAnexo} encType="multipart/form-data" style={{ marginTop: 8 }}>
+          <form action={adicionarAnexo} style={{ marginTop: 8 }}>
             <input type="hidden" name="empresaId" value={emp.id} />
             <div className="field-row">
               <label>Arquivo</label>
@@ -231,7 +278,7 @@ export function EmpresaCard({ empresa: emp, isAdmin }: { empresa: EmpresaData; i
         </div>
 
         <div className="ficha-sub">
-          <h3>Observações</h3>
+          <h3>📝 Observações</h3>
           {emp.observacoes.length === 0 ? (
             <div className="empty-state">Nenhuma observação ainda.</div>
           ) : (

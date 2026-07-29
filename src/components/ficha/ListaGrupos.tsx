@@ -11,7 +11,7 @@ export async function ListaGrupos({ isAdmin }: { isAdmin: boolean }) {
   return (
     <>
       <div className="card">
-        <h2>Criar Novo Grupo</h2>
+        <h2>➕ Criar Novo Grupo</h2>
         <form action={criarGrupo} className="field-row" style={{ gridTemplateColumns: "1fr auto" }}>
           <input className="text-input" name="nome" placeholder="Nome do grupo econômico" required />
           <button className="btn" type="submit">
@@ -21,7 +21,7 @@ export async function ListaGrupos({ isAdmin }: { isAdmin: boolean }) {
       </div>
 
       <div className="card">
-        <h2>Grupos Cadastrados</h2>
+        <h2>📋 Grupos Cadastrados</h2>
         <GruposFiltrados grupos={grupos.map((g) => ({ id: g.id, nome: g.nome, empresas: g._count.empresas }))} isAdmin={isAdmin} />
       </div>
     </>
