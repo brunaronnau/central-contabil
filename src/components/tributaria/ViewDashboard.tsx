@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { type Grupo, anosComDados, fmtBRL, fmtPct, getAnos, processarAno } from "@/lib/tributaria";
-import { drawBarChart } from "@/lib/tributaria-charts";
-import { drawGroupedBarChart, drawLineChart } from "@/lib/entregas-charts";
+import { drawBarChart, drawGroupedBarChart } from "@/lib/tributaria-charts";
+import { drawLineChart } from "@/lib/entregas-charts";
 import type { ViewKey } from "./TributariaClient";
 
 export function ViewDashboard({

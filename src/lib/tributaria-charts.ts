@@ -1,4 +1,11 @@
-export { drawLineChart, drawGroupedBarChart } from "@/lib/entregas-charts";
+export { drawLineChart } from "@/lib/entregas-charts";
+
+// Largura máxima de cada coluna — sem isso, com poucas categorias (ex.: só
+// Simples/Presumido/Real) a barra ocupa quase toda a largura do gráfico e
+// fica com aparência grosseira. Com o teto, as colunas ficam centralizadas
+// e num tamanho equilibrado (nem muito largas, nem finas demais).
+const LARGURA_MAX_BARRA = 64;
+const LARGURA_MAX_GRUPO_BARRAS = 90;
 
 function prepararCanvas(canvas: HTMLCanvasElement, hCss: number) {
   const dpr = window.devicePixelRatio || 1;
@@ -70,12 +77,14 @@ export function drawBarChart(canvas: HTMLCanvasElement, labels: string[], values
 
   const n = Math.max(labels.length, 1);
   const gap = 22;
-  const barW = (chartW - gap * (n - 1)) / n;
+  const barW = Math.min((chartW - gap * (n - 1)) / n, LARGURA_MAX_BARRA);
+  const larguraTotal = n * barW + gap * (n - 1);
+  const inicioX = padding.left + (chartW - larguraTotal) / 2;
 
   labels.forEach((label, i) => {
     const val = values[i] ?? 0;
     const barH = Math.max((val / maxVal) * chartH, 1);
-    const barX = padding.left + i * (barW + gap);
+    const barX = inicioX + i * (barW + gap);
     const barY = padding.top + chartH - barH;
     ctx.fillStyle = colors[i] ?? "#4A5B74";
     roundRect(ctx, barX, barY, barW, barH, 4);
@@ -93,5 +102,77 @@ export function drawBarChart(canvas: HTMLCanvasElement, labels: string[], values
     ctx.fillStyle = "#4A5B74";
     ctx.font = '10.5px "IBM Plex Sans"';
     wrapText(ctx, label, barX + barW / 2, padding.top + chartH + 16, barW + gap - 4, 12);
+  });
+}
+
+// Cópia local de drawGroupedBarChart (entregas-charts.ts) só com o teto de
+// largura do grupo de colunas — mantém o gráfico de Entregas intocado.
+export function drawGroupedBarChart(
+  canvas: HTMLCanvasElement,
+  labels: string[],
+  series: { name: string; color: string; data: number[] }[],
+  hCss: number,
+) {
+  const { ctx, w, h } = prepararCanvas(canvas, hCss);
+  const padding = { top: 44, right: 16, bottom: 56, left: 44 };
+  const chartW = w - padding.left - padding.right;
+  const chartH = h - padding.top - padding.bottom;
+
+  const allVals = series.flatMap((s) => s.data);
+  const maxVal = Math.max(...allVals, 1);
+  const ySteps = 4;
+
+  ctx.strokeStyle = "#E3E6EB";
+  ctx.lineWidth = 1;
+  ctx.font = '11px "IBM Plex Sans"';
+  ctx.fillStyle = "#8695AA";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+  for (let i = 0; i <= ySteps; i++) {
+    const val = (maxVal / ySteps) * i;
+    const y = padding.top + chartH - (chartH / ySteps) * i;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, y);
+    ctx.lineTo(padding.left + chartW, y);
+    ctx.stroke();
+    ctx.fillText(String(Math.round(val)), padding.left - 8, y);
+  }
+
+  const n = Math.max(labels.length, 1);
+  const groupGap = 22;
+  const groupW = Math.min((chartW - groupGap * (n - 1)) / n, LARGURA_MAX_GRUPO_BARRAS);
+  const larguraTotal = n * groupW + groupGap * (n - 1);
+  const inicioX = padding.left + (chartW - larguraTotal) / 2;
+  const barGap = 3;
+  const barW = (groupW - barGap * (series.length - 1)) / series.length;
+
+  labels.forEach((label, gi) => {
+    const groupX = inicioX + gi * (groupW + groupGap);
+    series.forEach((s, si) => {
+      const val = s.data[gi] ?? 0;
+      const barH = Math.max((val / maxVal) * chartH, 1);
+      const barX = groupX + si * (barW + barGap);
+      const barY = padding.top + chartH - barH;
+      ctx.fillStyle = s.color;
+      roundRect(ctx, barX, barY, barW, barH, 3);
+    });
+
+    ctx.fillStyle = "#4A5B74";
+    ctx.font = '10.5px "IBM Plex Sans"';
+    ctx.textBaseline = "alphabetic";
+    wrapText(ctx, label, groupX + groupW / 2, padding.top + chartH + 16, groupW + groupGap - 4, 12);
+  });
+
+  let lx = padding.left;
+  const ly1 = 10;
+  const ly2 = 19;
+  ctx.textAlign = "left";
+  ctx.font = '11px "IBM Plex Sans"';
+  series.forEach((s) => {
+    ctx.fillStyle = s.color;
+    ctx.fillRect(lx, ly1, 10, 10);
+    ctx.fillStyle = "#4A5B74";
+    ctx.fillText(s.name, lx + 14, ly2);
+    lx += ctx.measureText(s.name).width + 34;
   });
 }
