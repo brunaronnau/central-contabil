@@ -1,7 +1,19 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import { type Empresa, type Grupo, type MesesDados, LINHAS, MESES, SUBTAB_LABELS, criarMesesVazios, getAnos, getSubtabKeys, obterMeses } from "@/lib/tributaria";
+import {
+  type Empresa,
+  type Grupo,
+  type LinhaCampo,
+  type MesesDados,
+  LINHAS,
+  MESES,
+  SUBTAB_LABELS,
+  criarMesesVazios,
+  getAnos,
+  getSubtabKeys,
+  obterMeses,
+} from "@/lib/tributaria";
 import type { ViewKey } from "./TributariaClient";
 
 function MonthsTable({
@@ -11,7 +23,7 @@ function MonthsTable({
   onFill,
 }: {
   meses: MesesDados;
-  campos: { key: keyof MesesDados; label: string; header?: string }[];
+  campos: LinhaCampo[];
   onChange: (key: keyof MesesDados, monthIndex: number, value: number) => void;
   onFill: (key: keyof MesesDados) => void;
 }) {
@@ -34,17 +46,25 @@ function MonthsTable({
                 <td colSpan={14}>{campo.header}</td>
               </tr>
             )}
-            <tr>
+            <tr className={campo.total ? "linha-total" : undefined}>
               <td>{campo.label}</td>
-              {meses[campo.key].map((v, i) => (
-                <td key={i}>
-                  <input type="number" step="0.01" value={v || ""} onChange={(e) => onChange(campo.key, i, +e.target.value || 0)} />
-                </td>
-              ))}
+              {campo.total
+                ? meses[campo.total.debito].map((_, i) => (
+                    <td key={i}>
+                      <input type="number" value={meses[campo.total!.debito][i] - meses[campo.total!.credito][i]} disabled />
+                    </td>
+                  ))
+                : meses[campo.key].map((v, i) => (
+                    <td key={i}>
+                      <input type="number" step="0.01" value={v || ""} onChange={(e) => onChange(campo.key, i, +e.target.value || 0)} />
+                    </td>
+                  ))}
               <td>
-                <button type="button" className="fill-btn" title="Replicar Jan para todos os meses" onClick={() => onFill(campo.key)}>
-                  →
-                </button>
+                {!campo.total && (
+                  <button type="button" className="fill-btn" title="Replicar Jan para todos os meses" onClick={() => onFill(campo.key)}>
+                    →
+                  </button>
+                )}
               </td>
             </tr>
           </Fragment>

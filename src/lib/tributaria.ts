@@ -669,7 +669,16 @@ export function calcularCompletudeDados(grupo: Grupo, ano: number): { percReceit
 
 /* ==================== Campos das telas de "Dados Mensais" ==================== */
 
-export type LinhaCampo = { key: keyof MesesDados; label: string; header?: string };
+export type LinhaCampo = {
+  key: keyof MesesDados;
+  label: string;
+  header?: string;
+  // Linha só de exibição (não editável): mostra Débito - Crédito daquele
+  // imposto, só para conferência. Não participa de nenhum cálculo — o campo
+  // em "key" continua existindo no modelo de dados e nas apurações
+  // (calcularPresumido/calcularReal) exatamente como antes.
+  total?: { debito: keyof MesesDados; credito: keyof MesesDados };
+};
 
 export const LINHAS: Record<string, LinhaCampo[]> = {
   fat: [
@@ -688,18 +697,18 @@ export const LINHAS: Record<string, LinhaCampo[]> = {
     { key: "ipiCredito", label: "IPI — Crédito" },
     { key: "icmsDebito", label: "ICMS — Débito", header: "ICMS" },
     { key: "icmsCredito", label: "ICMS — Crédito" },
-    { key: "icmsEstoque", label: "ICMS — Estoque" },
+    { key: "icmsEstoque", label: "ICMS — Total (Débito - Crédito)", total: { debito: "icmsDebito", credito: "icmsCredito" } },
     { key: "icmsTTDDebito", label: "ICMS TTD — Débito", header: "ICMS TTD (guia própria)" },
     { key: "icmsTTDCredito", label: "ICMS TTD — Crédito" },
-    { key: "icmsTTDEstoque", label: "ICMS TTD — Estoque" },
+    { key: "icmsTTDEstoque", label: "ICMS TTD — Total (Débito - Crédito)", total: { debito: "icmsTTDDebito", credito: "icmsTTDCredito" } },
     { key: "issValor", label: "ISS", header: "ISS" },
     { key: "fundos", label: "Fundos Estaduais", header: "Fundos Estaduais" },
     { key: "pisDebito", label: "PIS — Débito", header: "PIS (não-cumulativo — só Lucro Real)" },
     { key: "pisCredito", label: "PIS — Crédito" },
-    { key: "pisEstoque", label: "PIS — Estoque" },
+    { key: "pisEstoque", label: "PIS — Total (Débito - Crédito)", total: { debito: "pisDebito", credito: "pisCredito" } },
     { key: "cofinsDebito", label: "COFINS — Débito", header: "COFINS (não-cumulativo — só Lucro Real)" },
     { key: "cofinsCredito", label: "COFINS — Crédito" },
-    { key: "cofinsEstoque", label: "COFINS — Estoque" },
+    { key: "cofinsEstoque", label: "COFINS — Total (Débito - Crédito)", total: { debito: "cofinsDebito", credito: "cofinsCredito" } },
   ],
   lalur: [
     { key: "lucroContabil", label: "Lucro Contábil" },

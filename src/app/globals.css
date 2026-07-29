@@ -1878,6 +1878,16 @@ body.presentation-mode #ent-btnSairApresentacaoFloat {
   color: var(--accent);
   padding: 6px 8px;
 }
+#tool-fiscal table.months tr.linha-total td:first-child {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+#tool-fiscal table.months tr.linha-total input:disabled {
+  background: var(--paper);
+  color: var(--ink-soft);
+  border-style: dashed;
+  cursor: default;
+}
 #tool-fiscal .fill-btn {
   font-size: 10px;
   padding: 2px 6px;
