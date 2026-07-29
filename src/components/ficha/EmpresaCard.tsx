@@ -138,7 +138,14 @@ export function EmpresaCard({ empresa: emp, isAdmin }: { empresa: EmpresaData; i
             </ul>
           )}
           <form action={adicionarTributacao.bind(null, emp.id)} className="field-row" style={{ gridTemplateColumns: "1fr 150px 150px auto", marginTop: 8 }}>
-            <input className="text-input" name="regime" placeholder="Ex.: Simples Nacional" required />
+            <select name="regime" defaultValue="" required>
+              <option value="" disabled>
+                Regime...
+              </option>
+              <option value="Simples Nacional">Simples Nacional</option>
+              <option value="Lucro Presumido">Lucro Presumido</option>
+              <option value="Lucro Real">Lucro Real</option>
+            </select>
             <input className="text-input" type="date" name="dataInicio" title="Data início" required />
             <input className="text-input" type="date" name="dataFim" title="Data fim (deixe em branco se ainda for o regime atual)" />
             <button className="btn secondary" type="submit">
