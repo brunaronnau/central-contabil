@@ -37,6 +37,8 @@ model User {
   liderancaFerias          LiderancaFerias[]
   passwordResetTokens      PasswordResetToken[]
   aniversarioEmailEnviados AniversarioEmailEnviado[]
+  fichaAnexos              FichaAnexo[]
+  fichaObservacoes         FichaObservacao[]
 
   @@map("users")
 }
@@ -418,4 +420,133 @@ model RelatorioMensalEnviado {
   createdAt DateTime @default(now())
 
   @@map("relatorio_mensal_enviado")
+}
+
+/**
+ * ==================== Ficha Informativa (transição entre analistas) ====================
+ * Registro por grupo/empresa pra quando um analista sai e outro assume a
+ * carteira, as peculiaridades não se perderem. Diferente da Análise
+ * Tributária (que recalcula números), aqui o objetivo é só documentação:
+ * dados de entrada/saída do grupo, e por empresa um histórico (tributação,
+ * analista responsável, anexos e observações) mantido em ordem cronológica
+ * — nunca sobrescrito, sempre acrescentado, pra servir de consulta.
+ */
+model FichaGrupo {
+  id          String    @id @default(cuid())
+  nome        String
+  dataEntrada DateTime? @db.Date
+  dataSaida   DateTime? @db.Date
+
+  contabilidadeAnteriorNome    String?
+  contabilidadeAnteriorCelular String?
+  contabilidadeAnteriorEmail   String?
+
+  contabilidadeNovaNome    String?
+  contabilidadeNovaCelular String?
+  contabilidadeNovaEmail   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  empresas FichaEmpresa[]
+
+  @@map("ficha_grupos")
+}
+
+enum FichaLocalDocumentos {
+  AC_DOCS
+  NEXTCLOUD
+  CAPSULA
+  OUTRO
+}
+
+model FichaEmpresa {
+  id   String @id @default(cuid())
+  nome String
+  cnpj String @default("")
+
+  localDocumentos      FichaLocalDocumentos @default(AC_DOCS)
+  localDocumentosOutro String?
+
+  semMovimentacao             Boolean   @default(false)
+  semMovimentacaoConfirmadoEm DateTime? @db.Date
+
+  contatoNome     String?
+  contatoTelefone String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  grupoId String
+  grupo   FichaGrupo @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+
+  tributacoes FichaTributacaoHistorico[]
+  analistas   FichaAnalistaHistorico[]
+  anexos      FichaAnexo[]
+  observacoes FichaObservacao[]
+
+  @@map("ficha_empresas")
+}
+
+// Cada troca de tributação fecha a entrada anterior (dataFim) e abre uma nova
+// (dataFim null = vigente) — assim dá pra ver de qual data até qual data a
+// empresa ficou em cada regime.
+model FichaTributacaoHistorico {
+  id         String    @id @default(cuid())
+  regime     String
+  dataInicio DateTime  @db.Date
+  dataFim    DateTime? @db.Date
+  createdAt  DateTime  @default(now())
+
+  empresaId String
+  empresa   FichaEmpresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@map("ficha_tributacao_historico")
+}
+
+// Mesma lógica do histórico de tributação, só que pra saber quem foi o
+// analista responsável pela empresa em cada período.
+model FichaAnalistaHistorico {
+  id           String    @id @default(cuid())
+  nomeAnalista String
+  dataInicio   DateTime  @db.Date
+  dataFim      DateTime? @db.Date
+  createdAt    DateTime  @default(now())
+
+  empresaId String
+  empresa   FichaEmpresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@map("ficha_analista_historico")
+}
+
+model FichaAnexo {
+  id         String   @id @default(cuid())
+  nome       String
+  tipo       String
+  tamanho    Int
+  dados      String   @db.Text
+  observacao String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  empresaId String
+  empresa   FichaEmpresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@map("ficha_anexos")
+}
+
+model FichaObservacao {
+  id        String   @id @default(cuid())
+  texto     String   @db.Text
+  createdAt DateTime @default(now())
+
+  empresaId String
+  empresa   FichaEmpresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@map("ficha_observacoes")
 }
