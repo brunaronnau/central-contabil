@@ -5,7 +5,6 @@ import {
   type EntregaRow,
   type EntregasStats,
   type GraficosMensal,
-  type LastUpload,
   type MetricasGeral,
   type PeriodResult,
   computeGraficosMensal,
@@ -17,13 +16,14 @@ import {
   fmt,
   fmtDateBR,
   heatmapLevel,
-  loadLastUpload,
   parseEntregasRows,
   pct,
   readEntregasFile,
-  saveLastUpload,
 } from "@/lib/entregas";
 import { drawGroupedBarChart, drawLineChart } from "@/lib/entregas-charts";
+import { salvarEntregas, type EntregasSalvas } from "@/app/actions/entregas";
+
+type UploadInfo = { arquivo: string; autor: string; atualizadoEm: string };
 
 function PeriodoSelects({
   competencias,
@@ -100,12 +100,12 @@ function BucketTable({ rows, nomeLabel }: { rows: { nome: string; entregues: num
   );
 }
 
-export function EntregasClient({ userName }: { userName: string }) {
+export function EntregasClient({ userName, initialData }: { userName: string; initialData: EntregasSalvas | null }) {
   const [raw, setRaw] = useState<EntregaRow[] | null>(null);
   const [stats, setStats] = useState<EntregasStats | null>(null);
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [processStatus, setProcessStatus] = useState("");
-  const [lastUpload, setLastUpload] = useState<LastUpload | null>(null);
+  const [lastUpload, setLastUpload] = useState<UploadInfo | null>(null);
   const [apresentacao, setApresentacao] = useState(false);
 
   const [periodoInicio, setPeriodoInicio] = useState("");
@@ -136,9 +136,13 @@ export function EntregasClient({ userName }: { userName: string }) {
   const chartComposicaoRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    // localStorage não existe durante o SSR — só dá pra ler depois de montar no cliente.
+    // Dados vêm do servidor (banco compartilhado) — quem abrir a ferramenta já
+    // vê o último relatório anexado por qualquer pessoa, sem precisar reanexar.
+    if (!initialData) return;
+    aplicarNovosDados(initialData.linhas);
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLastUpload(loadLastUpload());
+    setLastUpload({ arquivo: initialData.arquivo, autor: initialData.autor, atualizadoEm: initialData.atualizadoEm });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -156,6 +160,41 @@ export function EntregasClient({ userName }: { userName: string }) {
     setCurrentFile(file);
   }
 
+  function aplicarNovosDados(rows: EntregaRow[]) {
+    setRaw(rows);
+    const s = computeStats(rows);
+    setStats(s);
+
+    const comps = s.competenciasDisponiveis;
+    if (comps.length > 0) {
+      setPeriodoInicio(comps[0]);
+      setPeriodoFim(comps[comps.length - 1]);
+      setPeriodoResult(computePeriodStats(rows, comps[0], comps[comps.length - 1]));
+      setPeriodoStatus("");
+
+      setMetricasInicio(comps[0]);
+      setMetricasFim(comps[comps.length - 1]);
+      setMetricas(computeMetricasGeral(rows, comps[0], comps[comps.length - 1]));
+      setMetricasStatus("");
+
+      setGraficosInicio(comps[0]);
+      setGraficosFim(comps[comps.length - 1]);
+      setGraficos(computeGraficosMensal(s, comps[0], comps[comps.length - 1]));
+      setGraficosStatus("");
+    }
+
+    const pessoas = Array.from(new Set(rows.map((r) => r.respprazo || "(sem responsável)"))).sort((a, b) => a.localeCompare(b, "pt-BR"));
+    if (pessoas.length > 0 && comps.length > 0) {
+      setPessoaSelecionada(pessoas[0]);
+      setPessoaPeriodoInicio(comps[0]);
+      setPessoaPeriodoFim(comps[comps.length - 1]);
+      setPessoaResult(computePeriodStatsPorPessoa(rows, comps[0], comps[comps.length - 1], pessoas[0]));
+      setPessoaStatus("");
+    }
+
+    if (s.diasComEntrega.length > 0) setDiaSelecionado(s.diasComEntrega[0]);
+  }
+
   async function handleProcess() {
     if (!currentFile) return;
     setProcessStatus("Lendo arquivo...");
@@ -166,43 +205,16 @@ export function EntregasClient({ userName }: { userName: string }) {
         setProcessStatus(error ?? "Não foi possível ler o arquivo.");
         return;
       }
-      setProcessStatus(`${fmt(rows.length)} linhas processadas.`);
-      setRaw(rows);
-      const s = computeStats(rows);
-      setStats(s);
+      aplicarNovosDados(rows);
 
-      const comps = s.competenciasDisponiveis;
-      if (comps.length > 0) {
-        setPeriodoInicio(comps[0]);
-        setPeriodoFim(comps[comps.length - 1]);
-        setPeriodoResult(computePeriodStats(rows, comps[0], comps[comps.length - 1]));
-        setPeriodoStatus("");
-
-        setMetricasInicio(comps[0]);
-        setMetricasFim(comps[comps.length - 1]);
-        setMetricas(computeMetricasGeral(rows, comps[0], comps[comps.length - 1]));
-        setMetricasStatus("");
-
-        setGraficosInicio(comps[0]);
-        setGraficosFim(comps[comps.length - 1]);
-        setGraficos(computeGraficosMensal(s, comps[0], comps[comps.length - 1]));
-        setGraficosStatus("");
+      setProcessStatus(`${fmt(rows.length)} linhas processadas — salvando para todos...`);
+      try {
+        await salvarEntregas(currentFile.name, rows);
+        setProcessStatus(`${fmt(rows.length)} linhas processadas e salvas para todos.`);
+      } catch {
+        setProcessStatus(`${fmt(rows.length)} linhas processadas, mas houve um erro ao salvar para todos — só você está vendo esse resultado agora.`);
       }
-
-      const pessoas = Array.from(new Set(rows.map((r) => r.respprazo || "(sem responsável)"))).sort((a, b) => a.localeCompare(b, "pt-BR"));
-      if (pessoas.length > 0 && comps.length > 0) {
-        setPessoaSelecionada(pessoas[0]);
-        setPessoaPeriodoInicio(comps[0]);
-        setPessoaPeriodoFim(comps[comps.length - 1]);
-        setPessoaResult(computePeriodStatsPorPessoa(rows, comps[0], comps[comps.length - 1], pessoas[0]));
-        setPessoaStatus("");
-      }
-
-      if (s.diasComEntrega.length > 0) setDiaSelecionado(s.diasComEntrega[0]);
-
-      const info: LastUpload = { nome: userName, arquivo: currentFile.name, timestamp: Date.now() };
-      saveLastUpload(info);
-      setLastUpload(info);
+      setLastUpload({ arquivo: currentFile.name, autor: userName, atualizadoEm: new Date().toISOString() });
     } catch (err) {
       setProcessStatus(err instanceof Error ? `Erro ao processar: ${err.message}` : "Não foi possível ler o arquivo. Verifique o formato.");
     }
@@ -331,9 +343,9 @@ export function EntregasClient({ userName }: { userName: string }) {
             <div style={{ marginBottom: 16 }}>
               <span className="stamp ok">Última atualização</span>{" "}
               <span className="small-note">
-                anexado por <b>{lastUpload.nome}</b> em {new Date(lastUpload.timestamp).toLocaleDateString("pt-BR")} às{" "}
-                {new Date(lastUpload.timestamp).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · arquivo:{" "}
-                <span style={{ fontFamily: "var(--mono)" }}>{lastUpload.arquivo}</span>
+                anexado por <b>{lastUpload.autor}</b> em {new Date(lastUpload.atualizadoEm).toLocaleDateString("pt-BR")} às{" "}
+                {new Date(lastUpload.atualizadoEm).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · arquivo:{" "}
+                <span style={{ fontFamily: "var(--mono)" }}>{lastUpload.arquivo}</span> · <i>visível para todos</i>
               </span>
             </div>
           )}

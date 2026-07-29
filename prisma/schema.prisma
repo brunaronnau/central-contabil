@@ -39,6 +39,7 @@ model User {
   aniversarioEmailEnviados AniversarioEmailEnviado[]
   fichaAnexos              FichaAnexo[]
   fichaObservacoes         FichaObservacao[]
+  entregaUploads           EntregaUpload[]
 
   @@map("users")
 }
@@ -553,4 +554,46 @@ model FichaObservacao {
   author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   @@map("ficha_observacoes")
+}
+
+/**
+ * ==================== Gestão de Entregas ====================
+ * O relatório vindo do Acessórias é um retrato do momento (não um
+ * histórico incremental) — por isso cada novo upload SUBSTITUI o
+ * anterior por inteiro (ver salvarEntregas em actions/entregas.ts),
+ * em vez de acumular. Assim todo mundo que abre a ferramenta vê o
+ * mesmo relatório mais recente, sem precisar reanexar o arquivo.
+ */
+model EntregaUpload {
+  id        String   @id @default(cuid())
+  arquivo   String
+  createdAt DateTime @default(now())
+
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  linhas EntregaLinha[]
+
+  @@map("entrega_uploads")
+}
+
+model EntregaLinha {
+  id           String @id @default(cuid())
+  obrigacao    String
+  empresa      String
+  empid        String
+  departamento String
+  respPrazo    String
+  respEntrega  String
+  dataEntrega  String
+  prazoLegal   String
+  competencia  String
+  status       String
+  classe       String
+
+  uploadId String
+  upload   EntregaUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  @@index([uploadId])
+  @@map("entrega_linhas")
 }

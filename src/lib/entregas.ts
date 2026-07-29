@@ -475,26 +475,3 @@ export function computeGraficosMensal(stats: EntregasStats, startComp: string, e
 
   return { meses, tendenciaMensal };
 }
-
-/* ==================== Último upload (localStorage) ==================== */
-
-const LAST_UPLOAD_KEY = "nvc_entregas_last_upload";
-
-export type LastUpload = { nome: string; arquivo: string; timestamp: number };
-
-export function saveLastUpload(info: LastUpload) {
-  try {
-    localStorage.setItem(LAST_UPLOAD_KEY, JSON.stringify(info));
-  } catch {
-    // localStorage indisponível — não é crítico
-  }
-}
-
-export function loadLastUpload(): LastUpload | null {
-  try {
-    const raw = localStorage.getItem(LAST_UPLOAD_KEY);
-    return raw ? (JSON.parse(raw) as LastUpload) : null;
-  } catch {
-    return null;
-  }
-}
