@@ -120,27 +120,65 @@ export function ViewDados({
 
   const [importStatus, setImportStatus] = useState<Record<string, string>>({});
 
-  async function handleImportar(empresaId: string, file: File) {
-    setImportStatus((p) => ({ ...p, [empresaId]: "Lendo planilha..." }));
+  // Aceita vários arquivos de uma vez (ex.: um por ano). O ano de cada
+  // planilha é detectado automaticamente pelo cabeçalho dela ("Jan-25",
+  // "Jan-26"...); só cai no ano selecionado na tela quando não dá pra
+  // detectar. Assim dá pra importar o histórico inteiro numa tacada só,
+  // sem precisar trocar o seletor de "Ano de Referência" entre arquivos.
+  async function handleImportar(empresaId: string, files: FileList) {
+    setImportStatus((p) => ({ ...p, [empresaId]: `Lendo ${files.length > 1 ? `${files.length} planilhas` : "planilha"}...` }));
     try {
-      const wb = await lerWorkbook(file);
-      const { dados, encontrados, naoEncontrados } = importarDeWorkbook(wb);
-      if (encontrados.length === 0) {
-        setImportStatus((p) => ({ ...p, [empresaId]: "Não reconheci nenhum campo nessa planilha — confirme se é o modelo padrão." }));
+      const porAno: Record<number, Partial<MesesDados>> = {};
+      const resumoPorAno: { ano: number; encontrados: string[] }[] = [];
+      const semAnoDetectado: string[] = [];
+
+      for (const file of Array.from(files)) {
+        const wb = await lerWorkbook(file);
+        const resultado = importarDeWorkbook(wb);
+        if (resultado.ano === null) semAnoDetectado.push(file.name);
+        if (resultado.encontrados.length === 0) continue;
+
+        const anoAlvo = resultado.ano ?? ano;
+        porAno[anoAlvo] = { ...porAno[anoAlvo], ...resultado.dados };
+        const existente = resumoPorAno.find((r) => r.ano === anoAlvo);
+        if (existente) existente.encontrados.push(...resultado.encontrados);
+        else resumoPorAno.push({ ano: anoAlvo, encontrados: [...resultado.encontrados] });
+      }
+
+      if (resumoPorAno.length === 0) {
+        setImportStatus((p) => ({ ...p, [empresaId]: "Não reconheci nenhum campo nas planilhas selecionadas — confirme se é o modelo padrão." }));
         return;
       }
+
+      resumoPorAno.sort((a, b) => a.ano - b.ano);
       const msg =
-        `Encontrei e vou preencher no ano ${ano}:\n${encontrados.join(", ")}\n\n` +
-        (naoEncontrados.length > 0 ? `Não encontrei (fica pra preencher manualmente): ${naoEncontrados.join(", ")}\n\n` : "") +
-        `Isso substitui os valores já preenchidos nesses campos para este ano. Continuar?`;
+        `${resumoPorAno.map((r) => `Ano ${r.ano}: ${r.encontrados.length} campo(s) encontrados`).join("\n")}\n\n` +
+        (semAnoDetectado.length > 0
+          ? `Não identifiquei o ano de: ${semAnoDetectado.join(", ")} — usei o ano selecionado na tela (${ano}) pra esse(s).\n\n`
+          : "") +
+        `Isso substitui os valores já preenchidos nesses campos, em cada ano listado. Continuar?`;
       if (!confirm(msg)) {
         setImportStatus((p) => ({ ...p, [empresaId]: "" }));
         return;
       }
-      setMesesEmpresa(empresaId, (m) => ({ ...m, ...dados }));
+
+      onUpdateGrupo((g) => ({
+        ...g,
+        empresas: g.empresas.map((e) => {
+          if (e.id !== empresaId) return e;
+          const novosAnos = { ...e.anos };
+          for (const [anoStr, dadosAno] of Object.entries(porAno)) {
+            const anoNum = Number(anoStr);
+            novosAnos[anoNum] = { ...(novosAnos[anoNum] ?? criarMesesVazios()), ...dadosAno };
+          }
+          return { ...e, anos: novosAnos };
+        }),
+      }));
+
+      const totalCampos = resumoPorAno.reduce((s, r) => s + r.encontrados.length, 0);
       setImportStatus((p) => ({
         ...p,
-        [empresaId]: `Importado: ${encontrados.length} campo(s). Receita e LALUR não entram no import — confira e complete manualmente.`,
+        [empresaId]: `Importado: ${totalCampos} campo(s) em ${resumoPorAno.length} ano(s) (${resumoPorAno.map((r) => r.ano).join(", ")}). Receita e LALUR não entram no import — confira e complete manualmente.`,
       }));
     } catch (err) {
       setImportStatus((p) => ({ ...p, [empresaId]: err instanceof Error ? err.message : "Erro ao importar a planilha." }));
@@ -198,16 +236,17 @@ export function ViewDados({
                 <input
                   type="file"
                   accept=".xlsx,.xls"
+                  multiple
                   id={`import-planilha-${emp.id}`}
                   style={{ display: "none" }}
                   onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleImportar(emp.id, file);
+                    const files = e.target.files;
+                    if (files && files.length > 0) handleImportar(emp.id, files);
                     e.target.value = "";
                   }}
                 />
                 <label htmlFor={`import-planilha-${emp.id}`} className="btn secondary" style={{ cursor: "pointer" }}>
-                  📥 Importar de Planilha
+                  📥 Importar de Planilha(s)
                 </label>
                 {importStatus[emp.id] && <span className="small-note">{importStatus[emp.id]}</span>}
               </div>

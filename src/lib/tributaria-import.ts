@@ -103,6 +103,25 @@ function norm(s: unknown): string {
     .trim();
 }
 
+const MES_ANO_RE = new RegExp(`^(${MESES_NORM.join("|")})[-/](\\d{2,4})$`);
+
+// Acha o ano da planilha lendo os cabeçalhos "Jan-26"/"Jan-2026" (linha de
+// título da área de Faturamento, no topo da aba "DADOS") — assim dá pra
+// importar o histórico de anos anteriores sem precisar mudar o seletor de
+// "Ano de Referência" manualmente antes de cada arquivo.
+function detectarAno(grid: unknown[][]): number | null {
+  for (const linha of grid) {
+    for (const cel of linha ?? []) {
+      const m = MES_ANO_RE.exec(norm(cel));
+      if (m) {
+        const raw = parseInt(m[2], 10);
+        return raw < 100 ? 2000 + raw : raw;
+      }
+    }
+  }
+  return null;
+}
+
 function parseValor(raw: unknown): number {
   const s = (raw ?? "").toString().trim();
   if (!s) return 0;
@@ -160,6 +179,7 @@ export type ImportacaoResultado = {
   dados: Partial<MesesDados>;
   encontrados: string[];
   naoEncontrados: string[];
+  ano: number | null;
 };
 
 export function importarDeWorkbook(wb: XLSX.WorkBook): ImportacaoResultado {
@@ -168,6 +188,7 @@ export function importarDeWorkbook(wb: XLSX.WorkBook): ImportacaoResultado {
     throw new Error('Não encontrei a aba "DADOS" nesse arquivo — confirme se é o modelo padrão de Análise Tributária.');
   }
   const grid = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "", raw: false }) as unknown[][];
+  const ano = detectarAno(grid);
 
   const dados: Partial<MesesDados> = {};
   const encontrados: string[] = [];
@@ -197,7 +218,7 @@ export function importarDeWorkbook(wb: XLSX.WorkBook): ImportacaoResultado {
     }
   }
 
-  return { dados, encontrados, naoEncontrados };
+  return { dados, encontrados, naoEncontrados, ano };
 }
 
 export function lerWorkbook(file: File): Promise<XLSX.WorkBook> {
