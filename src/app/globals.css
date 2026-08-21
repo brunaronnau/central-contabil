@@ -2111,6 +2111,9 @@ body.presentation-mode #tool-fiscal .chart-box h3 {
   #tool-fiscal .print-only {
     display: block !important;
   }
+  #tool-fiscal .print-break-before {
+    page-break-before: always;
+  }
   #tool-fiscal .card {
     border: 1px solid var(--line);
     box-shadow: none;

@@ -5,6 +5,7 @@ import { type Grupo, anosComDados, fmtBRL, fmtPct, getAnos, processarAno } from 
 import { drawBarChart, drawGroupedBarChart } from "@/lib/tributaria-charts";
 import { drawLineChart } from "@/lib/entregas-charts";
 import type { ViewKey } from "./TributariaClient";
+import { RelatorioConteudo } from "./RelatorioConteudo";
 
 export function ViewDashboard({
   grupo,
@@ -211,6 +212,11 @@ export function ViewDashboard({
       <div className="chart-box">
         <h3>Evolução Anual — Cenário Recomendado</h3>
         <canvas ref={chartAnualRef} height={260} />
+      </div>
+
+      {/* Só aparece na versão impressa/PDF — na tela o relatório fica na aba própria. */}
+      <div className="print-only print-break-before">
+        <RelatorioConteudo grupo={grupo} ano={ano} />
       </div>
 
       <div className="btn-row no-print nav-footer">
