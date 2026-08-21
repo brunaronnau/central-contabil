@@ -15,6 +15,7 @@ import {
   obterMeses,
 } from "@/lib/tributaria";
 import type { ViewKey } from "./TributariaClient";
+import { importarDeWorkbook, lerWorkbook } from "@/lib/tributaria-import";
 
 function MonthsTable({
   meses,
@@ -117,6 +118,35 @@ export function ViewDados({
     setMesesEmpresa(empresaId, (m) => ({ ...m, [key]: new Array(12).fill(m[key][0]) }));
   }
 
+  const [importStatus, setImportStatus] = useState<Record<string, string>>({});
+
+  async function handleImportar(empresaId: string, file: File) {
+    setImportStatus((p) => ({ ...p, [empresaId]: "Lendo planilha..." }));
+    try {
+      const wb = await lerWorkbook(file);
+      const { dados, encontrados, naoEncontrados } = importarDeWorkbook(wb);
+      if (encontrados.length === 0) {
+        setImportStatus((p) => ({ ...p, [empresaId]: "Não reconheci nenhum campo nessa planilha — confirme se é o modelo padrão." }));
+        return;
+      }
+      const msg =
+        `Encontrei e vou preencher no ano ${ano}:\n${encontrados.join(", ")}\n\n` +
+        (naoEncontrados.length > 0 ? `Não encontrei (fica pra preencher manualmente): ${naoEncontrados.join(", ")}\n\n` : "") +
+        `Isso substitui os valores já preenchidos nesses campos para este ano. Continuar?`;
+      if (!confirm(msg)) {
+        setImportStatus((p) => ({ ...p, [empresaId]: "" }));
+        return;
+      }
+      setMesesEmpresa(empresaId, (m) => ({ ...m, ...dados }));
+      setImportStatus((p) => ({
+        ...p,
+        [empresaId]: `Importado: ${encontrados.length} campo(s). Receita e LALUR não entram no import — confira e complete manualmente.`,
+      }));
+    } catch (err) {
+      setImportStatus((p) => ({ ...p, [empresaId]: err instanceof Error ? err.message : "Erro ao importar a planilha." }));
+    }
+  }
+
   if (grupo.empresas.length === 0) {
     return (
       <section className="at-view active">
@@ -164,6 +194,23 @@ export function ViewDados({
               <span className="small-note">{aberta ? "▲" : "▼"}</span>
             </div>
             <div className="body">
+              <div className="btn-row no-print" style={{ marginBottom: 12, alignItems: "center" }}>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  id={`import-planilha-${emp.id}`}
+                  style={{ display: "none" }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleImportar(emp.id, file);
+                    e.target.value = "";
+                  }}
+                />
+                <label htmlFor={`import-planilha-${emp.id}`} className="btn secondary" style={{ cursor: "pointer" }}>
+                  📥 Importar de Planilha
+                </label>
+                {importStatus[emp.id] && <span className="small-note">{importStatus[emp.id]}</span>}
+              </div>
               <div className="subtabs">
                 {subtabKeys.map((k) => (
                   <button key={k} type="button" className={subtab === k ? "active" : ""} onClick={() => setSubtabs((p) => ({ ...p, [emp.id]: k }))}>
