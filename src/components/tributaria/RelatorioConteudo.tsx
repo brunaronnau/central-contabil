@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { CBS_RATE, type Grupo, MESES, anosComDados, fmtBRL, fmtPct, processarAno } from "@/lib/tributaria";
 
-const CATEGORIAS: { key: "irpj" | "csll" | "pis" | "cofins" | "icmsNormal" | "icmsTTD" | "iss" | "fundos" | "ipi" | "inss" | "simples"; label: string }[] = [
+export const CATEGORIAS: { key: "irpj" | "csll" | "pis" | "cofins" | "icmsNormal" | "icmsTTD" | "iss" | "fundos" | "ipi" | "inss" | "simples"; label: string }[] = [
   { key: "simples", label: "Simples (DAS)" },
   { key: "irpj", label: "IRPJ" },
   { key: "csll", label: "CSLL" },

@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { type Grupo, getAnos } from "@/lib/tributaria";
+import { gerarPptxRelatorio } from "@/lib/tributaria-pptx";
 import type { ViewKey } from "./TributariaClient";
 import { RelatorioConteudo } from "./RelatorioConteudo";
 
@@ -19,6 +21,19 @@ export function ViewRelatorio({
   onToggleApresentacao: () => void;
   onIrPara: (v: ViewKey) => void;
 }) {
+  const [gerando, setGerando] = useState(false);
+
+  async function handleExportarPptx() {
+    setGerando(true);
+    try {
+      await gerarPptxRelatorio(grupo, ano);
+    } catch (err) {
+      alert(err instanceof Error ? `Erro ao gerar o PowerPoint: ${err.message}` : "Erro ao gerar o PowerPoint.");
+    } finally {
+      setGerando(false);
+    }
+  }
+
   if (grupo.empresas.length === 0) {
     return (
       <section className="at-view active">
@@ -80,8 +95,8 @@ export function ViewRelatorio({
         <button className="btn secondary" onClick={() => onIrPara("dados")}>
           ← Anterior
         </button>
-        <button className="btn secondary" onClick={() => window.print()}>
-          Imprimir/Exportar PDF
+        <button className="btn secondary" onClick={handleExportarPptx} disabled={gerando}>
+          {gerando ? "Gerando..." : "Exportar PowerPoint"}
         </button>
         <button className="btn" onClick={() => onIrPara("dashboard")}>
           Próximo →

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { type Grupo, anosComDados, fmtBRL, fmtPct, getAnos, processarAno } from "@/lib/tributaria";
 import { drawBarChart, drawGroupedBarChart } from "@/lib/tributaria-charts";
 import { drawLineChart } from "@/lib/entregas-charts";
+import { gerarPptxDashboard, type GraficoCapturado } from "@/lib/tributaria-pptx";
 import type { ViewKey } from "./TributariaClient";
 import { RelatorioConteudo } from "./RelatorioConteudo";
 
@@ -23,6 +24,7 @@ export function ViewDashboard({
   onIrPara: (v: ViewKey) => void;
 }) {
   const [dashClient, setDashClient] = useState(grupo.grupoNome);
+  const [gerando, setGerando] = useState(false);
 
   const chartCenariosRef = useRef<HTMLCanvasElement>(null);
   const chartReformaRef = useRef<HTMLCanvasElement>(null);
@@ -93,6 +95,31 @@ export function ViewDashboard({
       );
     }
   }, [cenarios, melhorAnual, grupo.empresas.length]);
+
+  async function handleExportarPptx() {
+    setGerando(true);
+    try {
+      const capturas: [React.RefObject<HTMLCanvasElement | null>, string, string?][] = [
+        [chartCenariosRef, "Carga Tributária Total por Cenário"],
+        [chartReformaRef, "Carga Atual × Carga com CBS (Transição)", "Projeção simplificada: PIS/COFINS substituídos por CBS a 9,45% sobre o faturamento."],
+        [chartMensalRef, "Evolução Mensal — Cenário Recomendado × Mais Custoso"],
+        [chartAnualRef, "Evolução Anual — Cenário Recomendado"],
+      ];
+      const graficos: GraficoCapturado[] = capturas
+        .filter(([ref]) => ref.current)
+        .map(([ref, titulo, nota]) => ({
+          titulo,
+          nota,
+          dataUrl: ref.current!.toDataURL("image/png"),
+          aspecto: ref.current!.width / ref.current!.height,
+        }));
+      await gerarPptxDashboard(grupo, ano, dashClient, graficos);
+    } catch (err) {
+      alert(err instanceof Error ? `Erro ao gerar o PowerPoint: ${err.message}` : "Erro ao gerar o PowerPoint.");
+    } finally {
+      setGerando(false);
+    }
+  }
 
   if (grupo.empresas.length === 0) {
     return (
@@ -223,8 +250,8 @@ export function ViewDashboard({
         <button className="btn secondary" onClick={() => onIrPara("relatorio")}>
           ← Anterior
         </button>
-        <button className="btn secondary" onClick={() => window.print()}>
-          Imprimir/Exportar PDF
+        <button className="btn secondary" onClick={handleExportarPptx} disabled={gerando}>
+          {gerando ? "Gerando..." : "Exportar PowerPoint"}
         </button>
       </div>
     </section>
