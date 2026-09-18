@@ -51,7 +51,7 @@ function definirMestres(pptx: pptxgen) {
       { line: { x: MARGEM, y: 6.92, w: LARGURA_UTIL, h: 0, line: { color: COR.linha, width: 0.75 } } },
       {
         text: {
-          text: "NAVECON CONTABILIDADE E ASSESSORIA  ·  DOCUMENTO CONFIDENCIAL",
+          text: "NAVECON CONTABILIDADE E ASSESSORIA",
           options: { x: MARGEM, y: 7.02, w: 9, h: 0.3, fontFace: FONTE_TEXTO, fontSize: 8, color: COR.ouro, charSpacing: 1 },
         },
       },
@@ -95,7 +95,7 @@ function adicionarCapa(
     ]),
     { x: MARGEM, y: 4.4, w: LARGURA_UTIL, h: 1.4, align: "center", fontFace: FONTE_TEXTO, fontSize: 13, lineSpacingMultiple: 1.6, valign: "top" },
   );
-  slide.addText("NAVECON CONTABILIDADE E ASSESSORIA  ·  DOCUMENTO CONFIDENCIAL", {
+  slide.addText("NAVECON CONTABILIDADE E ASSESSORIA", {
     x: MARGEM,
     y: ALTURA - 0.7,
     w: LARGURA_UTIL,
