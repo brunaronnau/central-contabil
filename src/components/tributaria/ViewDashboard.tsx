@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { type Grupo, anosComDados, fmtBRL, fmtPct, getAnos, processarAno } from "@/lib/tributaria";
-import { drawBarChart, drawGroupedBarChart } from "@/lib/tributaria-charts";
-import { drawLineChart } from "@/lib/entregas-charts";
+import { drawBarChart, drawGroupedBarChart, drawLineChart } from "@/lib/tributaria-charts";
 import { gerarPptxDashboard, type GraficoCapturado } from "@/lib/tributaria-pptx";
 import type { ViewKey } from "./TributariaClient";
 import { RelatorioConteudo } from "./RelatorioConteudo";
