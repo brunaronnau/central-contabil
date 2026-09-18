@@ -2,21 +2,31 @@ import pptxgen from "pptxgenjs";
 import { CATEGORIAS } from "@/components/tributaria/RelatorioConteudo";
 import { CBS_RATE, type Grupo, MESES, anosComDados, fmtBRL, fmtPct, processarAno } from "@/lib/tributaria";
 
+// Identidade visual Navecon: fundo escuro (igual à barra lateral do sistema)
+// com dourado como cor de destaque — o mesmo par de cores da logo (dourado +
+// prata metálico sobre fundo escuro).
 const COR = {
-  ink: "1B2430",
-  inkSoft: "57616F",
-  paper: "EDF1EF",
-  paperAlt: "FFFFFF",
-  line: "D5DBD8",
-  accent: "2B4C6F",
-  accentSoft: "DCE6EE",
-  brass: "8A6D3B",
-  success: "1F7A5C",
+  fundo: "141B24",
+  painel: "1F2833",
+  painel2: "26313F",
+  linha: "3A4553",
+  ouro: "D4AF6A",
+  tinta: "1B2430",
+  branco: "FFFFFF",
+  textoMuted: "9AA5B1",
+  sucesso: "3DBE8B",
+  papel: "FFFFFF",
 };
 
+const FONTE_TITULO = "Georgia";
+const FONTE_TEXTO = "Calibri";
+
 const LARGURA = 13.33;
-const MARGEM = 0.5;
+const ALTURA = 7.5;
+const MARGEM = 0.55;
 const LARGURA_UTIL = LARGURA - MARGEM * 2;
+const MASTER_CAPA = "NAVECON_CAPA";
+const MASTER_CONTEUDO = "NAVECON_CONTEUDO";
 
 function logoPath() {
   return typeof window !== "undefined" ? `${window.location.origin}/navecon-logo.png` : "/navecon-logo.png";
@@ -26,10 +36,36 @@ function slug(s: string) {
   return s.replace(/[^a-z0-9]+/gi, "_").toLowerCase();
 }
 
+function definirMestres(pptx: pptxgen) {
+  pptx.defineSlideMaster({
+    title: MASTER_CAPA,
+    background: { color: COR.fundo },
+  });
+
+  pptx.defineSlideMaster({
+    title: MASTER_CONTEUDO,
+    background: { color: COR.fundo },
+    objects: [
+      { line: { x: MARGEM, y: 1.18, w: LARGURA_UTIL, h: 0, line: { color: COR.ouro, width: 1.5 } } },
+      { image: { path: logoPath(), x: LARGURA - MARGEM - 1.7, y: 0.32, w: 1.7, h: 0.32 } },
+      { line: { x: MARGEM, y: 6.92, w: LARGURA_UTIL, h: 0, line: { color: COR.linha, width: 0.75 } } },
+      {
+        text: {
+          text: "NAVECON CONTABILIDADE E ASSESSORIA  ·  DOCUMENTO CONFIDENCIAL",
+          options: { x: MARGEM, y: 7.02, w: 9, h: 0.3, fontFace: FONTE_TEXTO, fontSize: 8, color: COR.ouro, charSpacing: 1 },
+        },
+      },
+    ],
+    slideNumber: { x: LARGURA - MARGEM - 0.6, y: 7.02, w: 0.6, h: 0.3, fontFace: FONTE_TEXTO, fontSize: 8, color: COR.textoMuted, align: "right" },
+  });
+}
+
 function criarApresentacao() {
   const pptx = new pptxgen();
   pptx.layout = "LAYOUT_WIDE";
   pptx.author = "Navecon Contabilidade e Assessoria";
+  pptx.company = "Navecon Contabilidade e Assessoria";
+  definirMestres(pptx);
   return pptx;
 }
 
@@ -37,37 +73,82 @@ function celula(text: string, options: pptxgen.TableCellProps = {}): pptxgen.Tab
   return { text, options };
 }
 
-function adicionarCapa(pptx: pptxgen, { titulo, subtitulo, campos }: { titulo: string; subtitulo: string; campos: { label: string; valor: string }[] }) {
-  const slide = pptx.addSlide();
-  slide.background = { color: COR.paperAlt };
-  slide.addImage({ path: logoPath(), x: 4.9, y: 1.1, w: 3.5, h: 0.66 });
-  slide.addText(titulo, { x: MARGEM, y: 2.3, w: LARGURA_UTIL, h: 0.7, align: "center", fontFace: "Georgia", fontSize: 28, color: COR.ink, bold: true });
-  slide.addText(subtitulo, { x: MARGEM, y: 3.0, w: LARGURA_UTIL, h: 0.4, align: "center", fontSize: 14, color: COR.inkSoft });
+// Caixa retangular (com preenchimento/borda/cantos arredondados) usando um
+// addText vazio — evita depender da API de shapes, já testada e estável aqui.
+function caixa(slide: pptxgen.Slide, opts: pptxgen.TextPropsOptions) {
+  slide.addText("", opts);
+}
+
+function adicionarCapa(
+  pptx: pptxgen,
+  { titulo, subtitulo, campos }: { titulo: string; subtitulo: string; campos: { label: string; valor: string }[] },
+) {
+  const slide = pptx.addSlide({ masterName: MASTER_CAPA });
+  slide.addImage({ path: logoPath(), x: (LARGURA - 5) / 2, y: 1.3, w: 5, h: 0.94 });
+  caixa(slide, { x: (LARGURA - 1.2) / 2, y: 2.55, w: 1.2, h: 0, line: { color: COR.ouro, width: 1.5 } });
+  slide.addText(titulo, { x: MARGEM, y: 2.85, w: LARGURA_UTIL, h: 0.7, align: "center", fontFace: FONTE_TITULO, fontSize: 30, color: COR.branco, bold: true });
+  slide.addText(subtitulo, { x: MARGEM, y: 3.55, w: LARGURA_UTIL, h: 0.4, align: "center", fontFace: FONTE_TEXTO, fontSize: 14, color: COR.ouro });
   slide.addText(
-    campos.map((c, i) => ({ text: `${c.label}: ${c.valor}`, options: { breakLine: i < campos.length - 1 } })),
-    { x: MARGEM, y: 3.9, w: LARGURA_UTIL, h: 1.4, align: "center", fontSize: 13, color: COR.ink, lineSpacingMultiple: 1.4, valign: "top" },
+    campos.flatMap((c, i) => [
+      { text: `${c.label.toUpperCase()}:  `, options: { color: COR.textoMuted, breakLine: false } },
+      { text: c.valor, options: { color: COR.branco, bold: true, breakLine: i < campos.length - 1 } },
+    ]),
+    { x: MARGEM, y: 4.4, w: LARGURA_UTIL, h: 1.4, align: "center", fontFace: FONTE_TEXTO, fontSize: 13, lineSpacingMultiple: 1.6, valign: "top" },
   );
-  slide.addText("NAVECON CONTABILIDADE E ASSESSORIA", {
+  slide.addText("NAVECON CONTABILIDADE E ASSESSORIA  ·  DOCUMENTO CONFIDENCIAL", {
     x: MARGEM,
-    y: 6.7,
+    y: ALTURA - 0.7,
     w: LARGURA_UTIL,
     h: 0.3,
     align: "center",
-    fontSize: 10,
-    color: COR.brass,
+    fontFace: FONTE_TEXTO,
+    fontSize: 9.5,
+    color: COR.ouro,
     bold: true,
     charSpacing: 2,
   });
   return slide;
 }
 
-function novoSlideBase(pptx: pptxgen, titulo: string, descricao?: string) {
-  const slide = pptx.addSlide();
-  slide.background = { color: COR.paperAlt };
-  slide.addText(titulo, { x: MARGEM, y: 0.35, w: LARGURA_UTIL, h: 0.5, fontFace: "Georgia", fontSize: 20, color: COR.ink, bold: true });
-  let y = 0.95;
+function adicionarDivisor(pptx: pptxgen, titulo: string, sub?: string) {
+  const slide = pptx.addSlide({ masterName: MASTER_CAPA });
+  caixa(slide, { x: (LARGURA - 0.9) / 2, y: 3.15, w: 0.9, h: 0, line: { color: COR.ouro, width: 1.5 } });
+  slide.addText(titulo, { x: MARGEM, y: 3.4, w: LARGURA_UTIL, h: 0.7, align: "center", fontFace: FONTE_TITULO, fontSize: 26, color: COR.branco, bold: true });
+  if (sub) slide.addText(sub, { x: MARGEM, y: 4.05, w: LARGURA_UTIL, h: 0.4, align: "center", fontFace: FONTE_TEXTO, fontSize: 13, color: COR.ouro });
+}
+
+function adicionarFechamento(pptx: pptxgen) {
+  const slide = pptx.addSlide({ masterName: MASTER_CAPA });
+  slide.addImage({ path: logoPath(), x: (LARGURA - 4) / 2, y: 2.5, w: 4, h: 0.75 });
+  slide.addText("Obrigado pela confiança.", {
+    x: MARGEM,
+    y: 3.7,
+    w: LARGURA_UTIL,
+    h: 0.6,
+    align: "center",
+    fontFace: FONTE_TITULO,
+    fontSize: 22,
+    color: COR.ouro,
+    italic: true,
+  });
+  slide.addText("Navecon Contabilidade e Assessoria  ·  CRCSC-011054/O", {
+    x: MARGEM,
+    y: ALTURA - 0.9,
+    w: LARGURA_UTIL,
+    h: 0.3,
+    align: "center",
+    fontFace: FONTE_TEXTO,
+    fontSize: 10,
+    color: COR.textoMuted,
+  });
+}
+
+function novoSlideConteudo(pptx: pptxgen, titulo: string, descricao?: string) {
+  const slide = pptx.addSlide({ masterName: MASTER_CONTEUDO });
+  slide.addText(titulo, { x: MARGEM, y: 0.35, w: 9.5, h: 0.6, fontFace: FONTE_TITULO, fontSize: 21, color: COR.branco, bold: true });
+  let y = 1.4;
   if (descricao) {
-    slide.addText(descricao, { x: MARGEM, y, w: LARGURA_UTIL, h: 0.5, fontSize: 10.5, color: COR.inkSoft });
+    slide.addText(descricao, { x: MARGEM, y, w: LARGURA_UTIL, h: 0.5, fontFace: FONTE_TEXTO, fontSize: 10.5, color: COR.textoMuted });
     y += 0.55;
   }
   return { slide, y };
@@ -79,18 +160,20 @@ function adicionarLinhaKpis(slide: pptxgen.Slide, kpis: { label: string; valor: 
   const w = (LARGURA_UTIL - gap * (n - 1)) / n;
   kpis.forEach((k, i) => {
     const x = MARGEM + i * (w + gap);
+    const corTexto = k.destaque ? COR.tinta : COR.branco;
     const runs: pptxgen.TextProps[] = [
-      { text: k.label.toUpperCase(), options: { fontSize: 9, color: COR.inkSoft, breakLine: true } },
-      { text: k.valor, options: { fontSize: 16, color: k.destaque ? COR.success : COR.ink, bold: true, breakLine: !!k.sub } },
+      { text: k.label.toUpperCase(), options: { fontSize: 9, color: k.destaque ? COR.tinta : COR.textoMuted, breakLine: true } },
+      { text: k.valor, options: { fontSize: 16, color: corTexto, bold: true, breakLine: !!k.sub } },
     ];
-    if (k.sub) runs.push({ text: k.sub, options: { fontSize: 8, color: COR.inkSoft } });
+    if (k.sub) runs.push({ text: k.sub, options: { fontSize: 8, color: k.destaque ? COR.tinta : COR.textoMuted } });
     slide.addText(runs, {
       x,
       y,
       w,
-      h: 1.1,
-      fill: { color: COR.paperAlt },
-      line: { color: COR.line, width: 0.75 },
+      h: 1.15,
+      fontFace: FONTE_TEXTO,
+      fill: { color: k.destaque ? COR.ouro : COR.painel },
+      line: { color: k.destaque ? COR.ouro : COR.linha, width: 1 },
       rectRadius: 0.06,
       align: "left",
       valign: "middle",
@@ -102,11 +185,11 @@ function adicionarLinhaKpis(slide: pptxgen.Slide, kpis: { label: string; valor: 
 function adicionarHero(slide: pptxgen.Slide, { label, valor, sub }: { label: string; valor: string; sub: string }, y: number) {
   slide.addText(
     [
-      { text: label.toUpperCase(), options: { fontSize: 11, color: "FFFFFF", breakLine: true } },
-      { text: valor, options: { fontSize: 34, color: "FFFFFF", bold: true, breakLine: true } },
-      { text: sub, options: { fontSize: 10.5, color: "DCE6EE" } },
+      { text: label.toUpperCase(), options: { fontSize: 11, color: COR.tinta, breakLine: true, charSpacing: 1 } },
+      { text: valor, options: { fontSize: 36, color: COR.tinta, bold: true, breakLine: true } },
+      { text: sub, options: { fontSize: 10.5, color: COR.tinta } },
     ],
-    { x: MARGEM, y, w: LARGURA_UTIL, h: 1.5, fill: { color: COR.accent }, rectRadius: 0.08, align: "center", valign: "middle" },
+    { x: MARGEM, y, w: LARGURA_UTIL, h: 1.55, fontFace: FONTE_TEXTO, fill: { color: COR.ouro }, rectRadius: 0.08, align: "center", valign: "middle" },
   );
 }
 
@@ -130,18 +213,19 @@ function adicionarTabelaSlide(
     fontSize?: number;
   },
 ) {
-  const { slide, y } = novoSlideBase(pptx, titulo, descricao);
+  const { slide, y } = novoSlideConteudo(pptx, titulo, descricao);
   const headerRow: pptxgen.TableRow = headers.map((h) =>
-    celula(h, { bold: true, color: "FFFFFF", fill: { color: COR.accent }, fontSize, align: "center", valign: "middle" }),
+    celula(h, { bold: true, color: COR.tinta, fill: { color: COR.ouro }, fontSize, fontFace: FONTE_TEXTO, align: "center", valign: "middle" }),
   );
   const bodyRows: pptxgen.TableRow[] = rows.map((r, ri) => {
     const destaque = !!destaqueLinhas?.includes(ri);
     return r.map((texto, ci) =>
       celula(texto, {
         fontSize,
-        color: COR.ink,
+        fontFace: FONTE_TEXTO,
+        color: destaque ? COR.ouro : COR.branco,
         align: ci === 0 ? "left" : "right",
-        fill: { color: destaque ? COR.accentSoft : ri % 2 === 0 ? COR.paperAlt : COR.paper },
+        fill: { color: destaque ? "3A2F17" : ri % 2 === 0 ? COR.painel : COR.painel2 },
         bold: destaque,
       }),
     );
@@ -151,7 +235,7 @@ function adicionarTabelaSlide(
     y,
     w: LARGURA_UTIL,
     colW,
-    border: { type: "solid", color: COR.line, pt: 0.5 },
+    border: { type: "solid", color: COR.linha, pt: 0.5 },
     autoPage: false,
   });
 }
@@ -159,19 +243,37 @@ function adicionarTabelaSlide(
 export type GraficoCapturado = { titulo: string; dataUrl: string; aspecto: number; nota?: string };
 
 function adicionarGraficoSlide(pptx: pptxgen, grafico: GraficoCapturado) {
-  const { slide, y } = novoSlideBase(pptx, grafico.titulo);
-  const alturaMax = 5.6;
-  const larguraMax = 11.5;
+  const { slide, y } = novoSlideConteudo(pptx, grafico.titulo);
+  const alturaMax = 5.15;
+  const larguraMax = 11.2;
   let w = larguraMax;
   let h = w / grafico.aspecto;
   if (h > alturaMax) {
     h = alturaMax;
     w = h * grafico.aspecto;
   }
-  const x = (LARGURA - w) / 2;
-  slide.addImage({ data: grafico.dataUrl, x, y: y + (alturaMax - h) / 2, w, h });
+  const padding = 0.25;
+  const boxW = w + padding * 2;
+  const boxH = h + padding * 2;
+  const boxX = (LARGURA - boxW) / 2;
+  const boxY = y + (alturaMax + padding * 2 - boxH) / 2;
+
+  // Os gráficos são desenhados em canvas com fundo claro — emoldura numa
+  // "cartela" branca pra não parecer um retângulo branco solto no fundo escuro.
+  caixa(slide, { x: boxX, y: boxY, w: boxW, h: boxH, fill: { color: COR.papel }, rectRadius: 0.06 });
+  slide.addImage({ data: grafico.dataUrl, x: boxX + padding, y: boxY + padding, w, h });
+
   if (grafico.nota) {
-    slide.addText(grafico.nota, { x: MARGEM, y: y + alturaMax + 0.15, w: LARGURA_UTIL, h: 0.4, fontSize: 9.5, color: COR.inkSoft, align: "center" });
+    slide.addText(grafico.nota, {
+      x: MARGEM,
+      y: boxY + boxH + 0.12,
+      w: LARGURA_UTIL,
+      h: 0.35,
+      fontFace: FONTE_TEXTO,
+      fontSize: 9.5,
+      color: COR.textoMuted,
+      align: "center",
+    });
   }
 }
 
@@ -188,7 +290,7 @@ function adicionarConteudoRelatorio(pptx: pptxgen, grupo: Grupo, ano: number) {
   const piorCenario = cenarios.cenarios.find((c) => c.chave === cenarios.piorChave)!;
 
   {
-    const { slide, y } = novoSlideBase(pptx, "Resumo Executivo");
+    const { slide, y } = novoSlideConteudo(pptx, "Resumo Executivo");
     adicionarLinhaKpis(
       slide,
       [
@@ -235,6 +337,8 @@ function adicionarConteudoRelatorio(pptx: pptxgen, grupo: Grupo, ano: number) {
     destaqueLinhas: [comparativoAnual.findIndex((r) => r.ano === ano)],
   });
 
+  adicionarDivisor(pptx, "Análise Detalhada", "Detalhamento mensal por cenário simulado");
+
   cenarios.detalhados.forEach((d) => {
     const linhasCategorias = CATEGORIAS.filter((cat) => d[cat.key].reduce((a, v) => a + v, 0) !== 0);
     const rows = [
@@ -268,6 +372,7 @@ export async function gerarPptxRelatorio(grupo: Grupo, ano: number): Promise<voi
     ],
   });
   adicionarConteudoRelatorio(pptx, grupo, ano);
+  adicionarFechamento(pptx);
   await pptx.writeFile({ fileName: `relatorio_${slug(grupo.grupoNome)}_${ano}.pptx` });
 }
 
@@ -286,7 +391,7 @@ export async function gerarPptxDashboard(grupo: Grupo, ano: number, nomeCliente:
   });
 
   {
-    const { slide, y } = novoSlideBase(pptx, "Panorama Geral");
+    const { slide, y } = novoSlideConteudo(pptx, "Panorama Geral");
     adicionarHero(
       slide,
       {
@@ -304,14 +409,18 @@ export async function gerarPptxDashboard(grupo: Grupo, ano: number, nomeCliente:
         { label: "% sobre Faturamento", valor: cenarios.faturamentoAnual > 0 ? fmtPct(melhorCenario.total / cenarios.faturamentoAnual) : "—" },
         { label: "Faturamento Consolidado", valor: fmtBRL(cenarios.faturamentoAnual) },
       ],
-      y + 1.8,
+      y + 1.85,
     );
   }
 
-  for (const grafico of graficos) {
-    adicionarGraficoSlide(pptx, grafico);
+  if (graficos.length > 0) {
+    adicionarDivisor(pptx, "Evolução e Comparativos", "Visão gráfica da carga tributária ao longo do tempo");
+    for (const grafico of graficos) {
+      adicionarGraficoSlide(pptx, grafico);
+    }
   }
 
   adicionarConteudoRelatorio(pptx, grupo, ano);
+  adicionarFechamento(pptx);
   await pptx.writeFile({ fileName: `dashboard_${slug(nomeCliente || grupo.grupoNome)}_${ano}.pptx` });
 }
