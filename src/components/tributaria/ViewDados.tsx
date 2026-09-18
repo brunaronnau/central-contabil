@@ -17,6 +17,38 @@ import {
 import type { ViewKey } from "./TributariaClient";
 import { importarDeWorkbook, lerWorkbook } from "@/lib/tributaria-import";
 
+// Formata com separador de milhar (".") e decimal (",") — só pra exibição;
+// o valor numérico guardado no modelo não muda em nada.
+function formatarNumero(v: number): string {
+  return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// Enquanto o campo está em foco mostra o número "cru" (sem separador de
+// milhar) pra não atrapalhar a digitação; ao sair do campo, reformata com
+// ponto de milhar pra facilitar a conferência visual dos valores em R$.
+function CampoValor({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [editando, setEditando] = useState(false);
+  const [texto, setTexto] = useState("");
+
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      value={editando ? texto : value ? formatarNumero(value) : ""}
+      onFocus={() => {
+        setEditando(true);
+        setTexto(value ? value.toFixed(2).replace(".", ",") : "");
+      }}
+      onChange={(e) => setTexto(e.target.value)}
+      onBlur={() => {
+        setEditando(false);
+        const num = parseFloat(texto.replace(/\./g, "").replace(",", ".")) || 0;
+        onChange(num);
+      }}
+    />
+  );
+}
+
 function MonthsTable({
   meses,
   campos,
@@ -50,14 +82,17 @@ function MonthsTable({
             <tr className={campo.total ? "linha-total" : undefined}>
               <td>{campo.label}</td>
               {campo.total
-                ? meses[campo.total.debito].map((_, i) => (
-                    <td key={i}>
-                      <input type="number" value={meses[campo.total!.debito][i] - meses[campo.total!.credito][i]} disabled />
-                    </td>
-                  ))
+                ? meses[campo.total.debito].map((_, i) => {
+                    const valor = meses[campo.total!.debito][i] - meses[campo.total!.credito][i];
+                    return (
+                      <td key={i}>
+                        <input type="text" value={formatarNumero(valor)} disabled />
+                      </td>
+                    );
+                  })
                 : meses[campo.key].map((v, i) => (
                     <td key={i}>
-                      <input type="number" step="0.01" value={v || ""} onChange={(e) => onChange(campo.key, i, +e.target.value || 0)} />
+                      <CampoValor value={v} onChange={(val) => onChange(campo.key, i, val)} />
                     </td>
                   ))}
               <td>
